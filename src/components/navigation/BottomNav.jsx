@@ -8,7 +8,7 @@ const iconMap = {
   companies: Building2,
 };
 
-export function BottomNav({ navItems }) {
+export function BottomNav({ navItems, visible = true }) {
   const linkClass = ({ isActive }) =>
     `flex flex-col items-center justify-center gap-0.5 py-2 px-3 min-w-[64px] min-h-[56px] rounded-xl touch-manipulation transition-ui ${
       isActive ? 'text-accent bg-primary/15' : 'text-text-secondary'
@@ -16,7 +16,9 @@ export function BottomNav({ navItems }) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around h-16 px-2 bg-surface-soft border-t border-white/5 shadow-[var(--shadow-card)] sm:hidden"
+      className={`fixed bottom-0 left-0 right-0 z-30 flex items-center justify-around h-16 px-2 bg-surface-soft border-t border-white/5 shadow-[var(--shadow-card)] sm:hidden transition-transform duration-300 ease-out ${
+        visible ? 'translate-y-0' : 'translate-y-full'
+      }`}
       role="navigation"
       aria-label="Bottom navigation"
     >

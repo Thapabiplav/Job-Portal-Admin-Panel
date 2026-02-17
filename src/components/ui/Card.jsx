@@ -1,7 +1,7 @@
 export function Card({ children, className = '', padding = true, ...rest }) {
   return (
     <div
-      className={`bg-surface-soft rounded-2xl border border-white/5 overflow-hidden transition-shadow duration-200 hover:shadow-[var(--shadow-card)] ${padding ? 'p-4 sm:p-5' : ''} ${className}`}
+      className={`bg-surface-soft rounded-2xl border-2 border-accent sm:border sm:border-white/5 overflow-hidden transition-shadow duration-200 hover:shadow-[var(--shadow-card)] ${padding ? 'p-4 sm:p-5' : ''} ${className}`}
       style={{ boxShadow: 'var(--shadow-soft)' }}
       {...rest}
     >

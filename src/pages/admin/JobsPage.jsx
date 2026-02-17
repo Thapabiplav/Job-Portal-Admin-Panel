@@ -10,6 +10,8 @@ import {
   selectJobsActionLoading,
   clearJobsError,
 } from '../../features/jobs/jobsSlice';
+import { fetchStats } from '../../features/stats/statsSlice';
+import { selectStats } from '../../features/stats/statsSlice';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -17,6 +19,7 @@ import { Modal } from '../../components/modals/Modal';
 import { Pagination } from '../../components/ui/Pagination';
 import { ApplicationStatusBadge } from '../../components/ui/ApplicationStatusBadge';
 import { Avatar } from '../../components/ui/Avatar';
+import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
 import toast from 'react-hot-toast';
 import { ChevronDown, ChevronUp, Briefcase, Trash2, ExternalLink, User } from 'lucide-react';
@@ -31,6 +34,8 @@ function formatDate(value) {
   return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+const statIconSize = 'w-5 h-5';
+
 export default function JobsPage() {
   const dispatch = useDispatch();
   const list = useSelector(selectJobsList);
@@ -38,6 +43,7 @@ export default function JobsPage() {
   const loading = useSelector(selectJobsLoading);
   const error = useSelector(selectJobsError);
   const actionLoading = useSelector(selectJobsActionLoading);
+  const stats = useSelector(selectStats);
 
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -56,6 +62,9 @@ export default function JobsPage() {
   }, [dispatch, page, perPage, search]);
 
   useEffect(() => {
+    dispatch(fetchStats());
+  }, [dispatch]);
+  useEffect(() => {
     load();
   }, [load]);
 
@@ -72,12 +81,18 @@ export default function JobsPage() {
   const totalPages = pagination.totalPages || 1;
   const applications = (job) => job.applications || [];
 
+  const totalJobs = stats?.jobs?.total ?? 0;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl sm:text-2xl font-bold text-accent tracking-tight">Jobs</h1>
         <p className="text-text-primary text-sm mt-1">Moderate job listings and view applicant activity</p>
       </div>
+
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Total Jobs Posted" value={totalJobs} icon={<Briefcase className={statIconSize} />} />
+      </section>
 
       <Card>
         <div className="flex flex-col sm:flex-row gap-4">

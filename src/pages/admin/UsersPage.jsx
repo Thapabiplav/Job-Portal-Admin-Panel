@@ -12,6 +12,8 @@ import {
   selectUsersActionError,
   clearUsersError,
 } from '../../features/users/usersSlice';
+import { fetchStats } from '../../features/stats/statsSlice';
+import { selectStats } from '../../features/stats/statsSlice';
 import toast from 'react-hot-toast';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -19,10 +21,13 @@ import { Modal } from '../../components/modals/Modal';
 import { Pagination } from '../../components/ui/Pagination';
 import { RoleBadge } from '../../components/ui/RoleBadge';
 import { Avatar } from '../../components/ui/Avatar';
+import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { Lock, FileText, Trash2, Users } from 'lucide-react';
+import { Lock, FileText, Trash2, Users, UserCircle, Building2 } from 'lucide-react';
 
 const CLIENT_BASE = import.meta.env.VITE_CLIENT_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+
+const statIconSize = 'w-5 h-5';
 
 export default function UsersPage() {
   const dispatch = useDispatch();
@@ -32,6 +37,7 @@ export default function UsersPage() {
   const error = useSelector(selectUsersError);
   const actionLoading = useSelector(selectUsersActionLoading);
   const actionError = useSelector(selectUsersActionError);
+  const stats = useSelector(selectStats);
 
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -51,6 +57,9 @@ export default function UsersPage() {
     );
   }, [dispatch, page, perPage, roleFilter, search]);
 
+  useEffect(() => {
+    dispatch(fetchStats());
+  }, [dispatch]);
   useEffect(() => {
     load();
   }, [load]);
@@ -80,11 +89,13 @@ export default function UsersPage() {
   const cvUrl = (user) => {
     if (!user?.cvSlug) return null;
     const base = CLIENT_BASE.replace(/\/+$/, '');
-    return `${base}/profile/${user.cvSlug}`;
+    return `${base}/${user.cvSlug}`;
   };
 
   const totalPages = pagination.totalPages || 1;
   const isSuperAdmin = (u) => u.role === 'superadmin';
+
+  const userStats = stats?.users || {};
 
   return (
     <div className="space-y-6">
@@ -92,6 +103,12 @@ export default function UsersPage() {
         <h1 className="text-xl sm:text-2xl font-bold text-accent tracking-tight">Users</h1>
         <p className="text-text-primary text-sm mt-1">Manage accounts and roles — candidates, employers, and admins</p>
       </div>
+
+      <section className="grid grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-4">
+        <StatCard title="Total Users" value={userStats.total ?? 0} icon={<Users className={statIconSize} />} />
+        <StatCard title="Total Candidates" value={userStats.candidates ?? 0} icon={<UserCircle className={statIconSize} />} />
+        <StatCard title="Total Employers" value={userStats.employers ?? 0} icon={<Building2 className={statIconSize} />} />
+      </section>
 
       <Card>
         <div className="flex flex-col sm:flex-row gap-4">

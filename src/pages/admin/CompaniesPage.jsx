@@ -10,13 +10,18 @@ import {
   selectCompaniesActionLoading,
   clearCompaniesError,
 } from '../../features/companies/companiesSlice';
+import { fetchStats } from '../../features/stats/statsSlice';
+import { selectStats } from '../../features/stats/statsSlice';
 import toast from 'react-hot-toast';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Pagination } from '../../components/ui/Pagination';
+import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { Building2 } from 'lucide-react';
+import { Building2, Clock } from 'lucide-react';
+
+const statIconSize = 'w-5 h-5';
 
 export default function CompaniesPage() {
   const dispatch = useDispatch();
@@ -25,6 +30,7 @@ export default function CompaniesPage() {
   const loading = useSelector(selectCompaniesLoading);
   const error = useSelector(selectCompaniesError);
   const actionLoading = useSelector(selectCompaniesActionLoading);
+  const stats = useSelector(selectStats);
 
   const [filter, setFilter] = useState(''); // '' | 'pending' | 'verified'
   const [page, setPage] = useState(1);
@@ -37,6 +43,9 @@ export default function CompaniesPage() {
     dispatch(fetchOrganizations(params));
   }, [dispatch, page, perPage, filter]);
 
+  useEffect(() => {
+    dispatch(fetchStats());
+  }, [dispatch]);
   useEffect(() => {
     load();
   }, [load]);
@@ -55,12 +64,20 @@ export default function CompaniesPage() {
       active ? 'bg-gradient-to-r from-primary to-primary-dark text-white shadow-[var(--shadow-glow)]' : 'bg-surface-soft border border-white/10 text-text-secondary hover:bg-hover hover:text-text-primary'
     }`;
 
+  const approvedCount = stats?.organizations?.verified ?? 0;
+  const pendingCount = stats?.organizations?.pendingVerification ?? 0;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl sm:text-2xl font-bold text-accent tracking-tight">Approve Companies</h1>
         <p className="text-text-primary text-sm mt-1">Verify organization profiles</p>
       </div>
+
+      <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        <StatCard title="Total Approved Companies" value={approvedCount} icon={<Building2 className={statIconSize} />} />
+        <StatCard title="Pending Companies" value={pendingCount} icon={<Clock className={statIconSize} />} />
+      </section>
 
       <div className="flex flex-wrap gap-2" role="tablist">
         <button type="button" onClick={() => { setFilter(''); setPage(1); }} className={tabClass(filter === '')}>

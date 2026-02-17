@@ -1,7 +1,7 @@
 export function StatCard({ title, value, subtitle, icon, trend }) {
   return (
     <div
-      className="bg-surface-soft rounded-xl sm:rounded-2xl border border-white/5 p-2 sm:p-4 lg:p-5 transition-shadow duration-200 hover:shadow-[var(--shadow-card)]"
+      className="bg-surface-soft rounded-xl sm:rounded-2xl border-2 border-accent sm:border sm:border-white/5 p-2 sm:p-4 lg:p-5 transition-shadow duration-200 hover:shadow-[var(--shadow-card)]"
       style={{ boxShadow: 'var(--shadow-soft)' }}
     >
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
