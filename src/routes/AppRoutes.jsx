@@ -1,0 +1,44 @@
+import { lazy, Suspense } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ProtectedRoute, GuestOnlyRoute } from './ProtectedRoute';
+
+const LoginPage = lazy(() => import('../pages/admin/LoginPage'));
+const DashboardPage = lazy(() => import('../pages/admin/DashboardPage'));
+const UsersPage = lazy(() => import('../pages/admin/UsersPage'));
+const JobsPage = lazy(() => import('../pages/admin/JobsPage'));
+const CompaniesPage = lazy(() => import('../pages/admin/CompaniesPage'));
+const AdminLayout = lazy(() => import('../layouts/AdminLayout'));
+
+function PageFallback() {
+  return (
+    <div className="min-h-[50vh] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-10 w-10 border-2 border-slate-300 border-t-slate-600" />
+    </div>
+  );
+}
+
+export function AppRoutes() {
+  return (
+    <Suspense fallback={<PageFallback />}>
+      <Routes>
+        <Route path="/admin/login" element={
+          <GuestOnlyRoute>
+            <LoginPage />
+          </GuestOnlyRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute requireSuperAdmin>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="jobs" element={<JobsPage />} />
+          <Route path="companies" element={<CompaniesPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    </Suspense>
+  );
+}

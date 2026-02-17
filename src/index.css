@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/* ─── Admin palette (dark + orange) ─── */
+@theme {
+  /* Primary: orange gradient (500 → 600 → 700) */
+  --color-primary: #f97316;
+  --color-primary-dark: #ea580c;
+  --color-primary-darker: #c2410c;
+  /* Surfaces */
+  --color-surface: #121212;
+  --color-surface-soft: #0f0f14;
+  --color-input: #1a1a22;
+  --color-hover: #1f1f29;
+  /* Accent & glow */
+  --color-accent: #fb923c;
+  --color-accent-glow: rgba(251, 146, 60, 0.25);
+  --color-accent-glow-strong: rgba(251, 146, 60, 0.4);
+  /* Text */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
+}
+
+:root {
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-hover: 0 8px 28px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px var(--color-accent-glow);
+  --radius-card: 1rem;
+  --radius-badge: 9999px;
+  --transition-fast: 150ms ease;
+  --transition-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  -webkit-tap-highlight-color: transparent;
+  font-feature-settings: "rlig" 1, "calt" 1;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+button, a, [role="button"], input, select, .transition-ui {
+  transition: background-color var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast), box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+button:active, .tap-feedback:active {
+  transform: scale(0.98);
+}
+
+/* Table row hover: orange glow */
+.admin-table-row-hover:hover {
+  box-shadow: 0 0 20px var(--color-accent-glow);
+}
