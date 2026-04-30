@@ -11,7 +11,14 @@ const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { to: '/admin/users', label: 'Users', icon: 'users' },
   { to: '/admin/jobs', label: 'Jobs', icon: 'jobs' },
+  { to: '/admin/orders', label: 'Orders', icon: 'orders' },
+  { to: "/admin/services", label: "Services", icon: "services" },
   { to: '/admin/companies', label: 'Approve Companies', icon: 'companies' },
+  {
+    to: '/admin/candidate-verifications',
+    label: 'Approve Candidate',
+    icon: 'candidateVerification',
+  },
 ];
 
 export default function AdminLayout() {

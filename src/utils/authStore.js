@@ -1,41 +1,14 @@
-const ACCESS_KEY = 'admin_access_token';
-const REFRESH_KEY = 'admin_refresh_token';
-const USER_KEY = 'admin_user';
-
-export function getAccessToken() {
-  return sessionStorage.getItem(ACCESS_KEY);
-}
-
-export function setAccessToken(token) {
-  if (token) sessionStorage.setItem(ACCESS_KEY, token);
-  else sessionStorage.removeItem(ACCESS_KEY);
-}
-
-export function getRefreshToken() {
-  return sessionStorage.getItem(REFRESH_KEY);
-}
-
-export function setRefreshToken(token) {
-  if (token) sessionStorage.setItem(REFRESH_KEY, token);
-  else sessionStorage.removeItem(REFRESH_KEY);
-}
-
+/**
+ * Auth: HttpOnly cookies on the API only. No localStorage/sessionStorage for tokens or hints.
+ * clearAllTokens clears legacy JWT keys from older builds; server clears cookies on logout.
+ */
 export function clearAllTokens() {
-  sessionStorage.removeItem(ACCESS_KEY);
-  sessionStorage.removeItem(REFRESH_KEY);
-  sessionStorage.removeItem(USER_KEY);
-}
-
-export function getStoredUser() {
   try {
-    const raw = sessionStorage.getItem(USER_KEY);
-    return raw ? JSON.parse(raw) : null;
+    sessionStorage.removeItem('admin_access_token');
+    sessionStorage.removeItem('admin_refresh_token');
+    sessionStorage.removeItem('admin_user');
+    localStorage.removeItem('admin_auth_hint');
   } catch {
-    return null;
+    /* ignore */
   }
-}
-
-export function setStoredUser(user) {
-  if (user) sessionStorage.setItem(USER_KEY, JSON.stringify(user));
-  else sessionStorage.removeItem(USER_KEY);
 }

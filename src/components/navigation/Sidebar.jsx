@@ -4,6 +4,8 @@ import {
   Users,
   Briefcase,
   Building2,
+  UserCheck,
+  ShoppingBag,
   ExternalLink,
   LogOut,
   X,
@@ -14,6 +16,9 @@ const iconMap = {
   users: Users,
   jobs: Briefcase,
   companies: Building2,
+  candidateVerification: UserCheck,
+  orders: ShoppingBag,
+  services: Briefcase,
 };
 
 export function Sidebar({ open, onClose, navItems, onViewSite, onLogout }) {

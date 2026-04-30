@@ -7,6 +7,9 @@ const DashboardPage = lazy(() => import('../pages/admin/DashboardPage'));
 const UsersPage = lazy(() => import('../pages/admin/UsersPage'));
 const JobsPage = lazy(() => import('../pages/admin/JobsPage'));
 const CompaniesPage = lazy(() => import('../pages/admin/CompaniesPage'));
+const OrdersPage = lazy(() => import('../pages/admin/OrdersPage'));
+const ServicesPage = lazy(() => import("../pages/admin/ServicesPage"));
+const CandidateVerificationPage = lazy(() => import('../pages/CandidateVerification'));
 const AdminLayout = lazy(() => import('../layouts/AdminLayout'));
 
 function PageFallback() {
@@ -35,7 +38,10 @@ export function AppRoutes() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="jobs" element={<JobsPage />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="services" element={<ServicesPage />} />
           <Route path="companies" element={<CompaniesPage />} />
+          <Route path="candidate-verifications" element={<CandidateVerificationPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>

@@ -358,10 +358,10 @@ export default function UsersPage() {
               Are you sure you want to delete <strong className="text-text-primary">{deleteModal.name}</strong>? This cannot be undone.
             </p>
             <div className="flex gap-2 justify-end">
-              <Button variant="secondary" onClick={() => setDeleteModal(null)}>Cancel</Button>
               <Button variant="danger" onClick={handleDeleteConfirm} disabled={actionLoading === deleteModal.id}>
-                Delete
+                Yes
               </Button>
+              <Button variant="secondary" onClick={() => setDeleteModal(null)}>No</Button>
             </div>
           </div>
         )}

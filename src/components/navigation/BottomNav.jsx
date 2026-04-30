@@ -1,11 +1,14 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Briefcase, Building2 } from 'lucide-react';
+import { LayoutDashboard, Users, Briefcase, Building2, UserCheck, ShoppingBag } from 'lucide-react';
 
 const iconMap = {
   dashboard: LayoutDashboard,
   users: Users,
   jobs: Briefcase,
   companies: Building2,
+  candidateVerification: UserCheck,
+  orders: ShoppingBag,
+  services: Briefcase,
 };
 
 export function BottomNav({ navItems, visible = true }) {

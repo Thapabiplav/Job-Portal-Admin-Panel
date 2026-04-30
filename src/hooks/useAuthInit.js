@@ -1,13 +1,11 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchMe } from '../features/auth/authSlice';
-import { getAccessToken } from '../utils/authStore';
 
+/** Restore session from HttpOnly cookies only (GET /auth/me). */
 export function useAuthInit() {
   const dispatch = useDispatch();
   useEffect(() => {
-    if (getAccessToken()) {
-      dispatch(fetchMe());
-    }
+    dispatch(fetchMe());
   }, [dispatch]);
 }

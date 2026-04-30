@@ -1,24 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authAPI } from '../../api/axios';
-import {
-  setAccessToken,
-  setRefreshToken,
-  clearAllTokens,
-  getStoredUser,
-  setStoredUser,
-  getAccessToken,
-  getRefreshToken,
-} from '../../utils/authStore';
+import { clearAllTokens } from '../../utils/authStore';
 
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
       const res = await authAPI.login(credentials);
-      const { user, accessToken, refreshToken } = res.data;
-      setAccessToken(accessToken);
-      setRefreshToken(refreshToken);
-      setStoredUser(user);
+      const { user } = res.data;
       return user;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Login failed.');
@@ -26,11 +15,11 @@ export const login = createAsyncThunk(
   }
 );
 
-export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
+export const logout = createAsyncThunk('auth/logout', async () => {
   try {
-    if (getAccessToken() || getRefreshToken()) await authAPI.logout();
+    await authAPI.logout();
   } catch {
-    // ignore
+    // ignore — still clear client state
   } finally {
     clearAllTokens();
   }
@@ -43,7 +32,6 @@ export const fetchMe = createAsyncThunk(
     try {
       const res = await authAPI.getMe();
       const user = res.data?.user ?? res.data;
-      setStoredUser(user);
       return user;
     } catch (err) {
       clearAllTokens();
@@ -53,8 +41,8 @@ export const fetchMe = createAsyncThunk(
 );
 
 const initialState = {
-  user: getStoredUser(),
-  isAuthenticated: !!getStoredUser()?.id,
+  user: null,
+  isAuthenticated: false,
   isLoading: false,
   error: null,
 };

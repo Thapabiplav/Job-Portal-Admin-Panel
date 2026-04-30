@@ -1,11 +1,5 @@
 import axios from 'axios';
-import {
-  getAccessToken,
-  setAccessToken,
-  getRefreshToken,
-  setRefreshToken,
-  clearAllTokens,
-} from '../utils/authStore';
+import { clearAllTokens } from '../utils/authStore';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
@@ -18,15 +12,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(
-  (config) => {
-    const token = getAccessToken();
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    const url = config.url || '';
-    if ((url.includes('/auth/refresh') || url.includes('/auth/logout')) && getRefreshToken()) {
-      config.headers['X-Refresh-Token'] = getRefreshToken();
-    }
-    return config;
-  },
+  (config) => config,
   (error) => Promise.reject(error)
 );
 
@@ -46,38 +32,18 @@ api.interceptors.response.use(
     }
     if (originalRequest._retry) return Promise.reject(error);
 
-    let isCrossOrigin = false;
-    if (API_BASE_URL && typeof window !== 'undefined') {
-      try {
-        const apiOrigin = new URL(API_BASE_URL.replace(/\/+$/, '')).origin;
-        isCrossOrigin = apiOrigin !== window.location.origin;
-      } catch {
-        isCrossOrigin = false;
-      }
-    }
-    if (isCrossOrigin && !getRefreshToken()) {
-      clearAllTokens();
-      return Promise.reject(error);
-    }
-
     originalRequest._retry = true;
     try {
       if (!refreshPromise) {
-        refreshPromise = api.post('/auth/refresh').then((res) => {
-          if (res.data?.accessToken) {
-            setAccessToken(res.data.accessToken);
-            if (res.data?.refreshToken) setRefreshToken(res.data.refreshToken);
-          }
-          return res;
-        }).catch((err) => {
+        refreshPromise = api.post('/auth/refresh').then((res) => res).catch((err) => {
           refreshPromise = null;
           throw err;
         });
       }
       const refreshRes = await refreshPromise;
       refreshPromise = null;
-      if (refreshRes?.data?.accessToken) {
-        originalRequest.headers.Authorization = `Bearer ${refreshRes.data.accessToken}`;
+      if (refreshRes?.status === 200) {
+        delete originalRequest.headers.Authorization;
         return api(originalRequest);
       }
     } catch (refreshErr) {
@@ -106,6 +72,33 @@ export const adminAPI = {
   deleteJob: (id) => api.delete(`/admin/jobs/${id}`),
   getOrganizations: (params) => api.get('/admin/organizations', { params }),
   verifyOrganization: (id) => api.put(`/admin/organizations/${id}/verify`),
+  getCandidateVerificationRequests: async (params) => {
+    try {
+      return await api.get('/admin/candidate-verifications', { params });
+    } catch (err) {
+      const isNotFound = err?.response?.status === 404;
+      if (!isNotFound) throw err;
+      return api.get('/admin/candidate-verification-requests', { params });
+    }
+  },
+  verifyCandidateRequest: async (id) => {
+    try {
+      return await api.put(`/admin/candidate-verifications/${id}/verify`);
+    } catch (err) {
+      const isNotFound = err?.response?.status === 404;
+      if (!isNotFound) throw err;
+      return api.put(`/admin/candidate-verification-requests/${id}/verify`);
+    }
+  },
+  getOrders: (params) => api.get('/admin/orders', { params }),
+  updateOrderStatus: (id, status) => api.patch(`/admin/orders/${id}/status`, { status }),
+  contactVendorByEmail: (id, payload = {}) =>
+    api.post(`/admin/orders/${id}/contact-vendor-email`, payload),
+  getServiceBookings: (params) => api.get("/admin/service-bookings", { params }),
+  updateServiceBookingStatus: (id, status) =>
+    api.patch(`/admin/service-bookings/${id}/status`, { status }),
+  contactServiceVendorByEmail: (id, payload = {}) =>
+    api.post(`/admin/service-bookings/${id}/contact-vendor-email`, payload),
 };
 
 export default api;
