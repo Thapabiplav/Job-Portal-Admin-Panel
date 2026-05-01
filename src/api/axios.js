@@ -1,5 +1,11 @@
 import axios from 'axios';
-import { clearAllTokens } from '../utils/authStore';
+import {
+  clearAllTokens,
+  getAccessToken,
+  getRefreshToken,
+  setAccessToken,
+  setRefreshToken,
+} from '../utils/authStore';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
@@ -12,7 +18,18 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(
-  (config) => config,
+  (config) => {
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else if (config.headers?.Authorization) {
+      delete config.headers.Authorization;
+    }
+    return config;
+  },
   (error) => Promise.reject(error)
 );
 
@@ -35,15 +52,25 @@ api.interceptors.response.use(
     originalRequest._retry = true;
     try {
       if (!refreshPromise) {
-        refreshPromise = api.post('/auth/refresh').then((res) => res).catch((err) => {
-          refreshPromise = null;
-          throw err;
-        });
+        const rt = getRefreshToken();
+        const refreshPayload = rt ? { refresh_token: rt } : {};
+        const refreshConfig = rt ? { headers: { 'X-Refresh-Token': rt } } : undefined;
+        refreshPromise = api
+          .post('/auth/refresh', refreshPayload, refreshConfig)
+          .then((res) => res)
+          .catch((err) => {
+            refreshPromise = null;
+            throw err;
+          });
       }
       const refreshRes = await refreshPromise;
       refreshPromise = null;
       if (refreshRes?.status === 200) {
-        delete originalRequest.headers.Authorization;
+        const newAccess =
+          refreshRes?.data?.access_token || refreshRes?.data?.accessToken || null;
+        if (newAccess) setAccessToken(newAccess);
+        const newRt = refreshRes?.data?.refresh_token || null;
+        if (newRt) setRefreshToken(newRt);
         return api(originalRequest);
       }
     } catch (refreshErr) {
@@ -58,7 +85,12 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   logout: () => api.post('/auth/logout'),
-  refresh: () => api.post('/auth/refresh'),
+  refresh: () => {
+    const rt = getRefreshToken();
+    const payload = rt ? { refresh_token: rt } : {};
+    const cfg = rt ? { headers: { 'X-Refresh-Token': rt } } : undefined;
+    return api.post('/auth/refresh', payload, cfg);
+  },
   getMe: () => api.get('/auth/me'),
 };
 

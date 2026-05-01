@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authAPI } from '../../api/axios';
-import { clearAllTokens } from '../../utils/authStore';
+import {
+  clearAllTokens,
+  setAccessToken,
+  setRefreshToken,
+  setAdminSessionHint,
+  hasAdminSessionHint,
+} from '../../utils/authStore';
 
 export const login = createAsyncThunk(
   'auth/login',
@@ -8,6 +14,11 @@ export const login = createAsyncThunk(
     try {
       const res = await authAPI.login(credentials);
       const { user } = res.data;
+      const accessToken = res.data?.access_token || res.data?.accessToken || null;
+      const refreshToken = res.data?.refresh_token || null;
+      if (accessToken) setAccessToken(accessToken);
+      if (refreshToken) setRefreshToken(refreshToken);
+      setAdminSessionHint();
       return user;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Login failed.');
@@ -29,6 +40,9 @@ export const logout = createAsyncThunk('auth/logout', async () => {
 export const fetchMe = createAsyncThunk(
   'auth/fetchMe',
   async (_, { rejectWithValue }) => {
+    if (!hasAdminSessionHint()) {
+      return null;
+    }
     try {
       const res = await authAPI.getMe();
       const user = res.data?.user ?? res.data;
