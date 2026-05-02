@@ -1,9 +1,7 @@
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Briefcase, FileText, Building2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchStats } from '../../features/stats/statsSlice';
-import { selectStats, selectStatsLoading, selectStatsError } from '../../features/stats/statsSlice';
+import { fetchStats, selectStats, selectStatsError } from '../../features/stats/statsSlice';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { StatCard } from '../../components/cards/StatCard';
 import { Button } from '../../components/ui/Button';
@@ -14,14 +12,20 @@ const iconSize = "w-5 h-5";
 export default function DashboardPage() {
   const dispatch = useDispatch();
   const stats = useSelector(selectStats);
-  const loading = useSelector(selectStatsLoading);
   const error = useSelector(selectStatsError);
 
-  useEffect(() => {
-    dispatch(fetchStats());
-  }, [dispatch]);
+  if (error && !stats) {
+    return (
+      <div className="rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 p-6">
+        <p>{error}</p>
+        <Button variant="secondary" size="sm" className="mt-3" onClick={() => dispatch(fetchStats({ force: true }))}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
-  if (loading && !stats) {
+  if (!stats) {
     return (
       <div className="space-y-6">
         <div>
@@ -41,18 +45,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (error && !stats) {
-    return (
-      <div className="rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 p-6">
-        <p>{error}</p>
-        <Button variant="secondary" size="sm" className="mt-3" onClick={() => dispatch(fetchStats())}>
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
-  const s = stats || {};
+  const s = stats;
   const users = s.users || {};
   const jobs = s.jobs || {};
   const applications = s.applications || {};

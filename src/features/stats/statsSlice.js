@@ -1,15 +1,26 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { adminAPI } from '../../api/axios';
+import { logout } from '../auth/authSlice';
 
+/** Pass `{ force: true }` to always refetch (e.g. Retry). */
 export const fetchStats = createAsyncThunk(
   'stats/fetchStats',
-  async (_, { rejectWithValue }) => {
+  async (_arg, { rejectWithValue }) => {
     try {
       const res = await adminAPI.getStats();
       return res.data?.stats ?? res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Failed to load stats.');
     }
+  },
+  {
+    condition: (arg, { getState }) => {
+      if (arg?.force) return true;
+      const { data, isLoading } = getState().stats;
+      if (data != null) return false;
+      if (isLoading) return false;
+      return true;
+    },
   }
 );
 
@@ -41,7 +52,8 @@ const statsSlice = createSlice({
       .addCase(fetchStats.rejected, (state, { payload }) => {
         state.isLoading = false;
         state.error = payload;
-      });
+      })
+      .addCase(logout.fulfilled, () => ({ ...initialState }));
   },
 });
 

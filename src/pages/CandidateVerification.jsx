@@ -1,8 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import { fetchStats } from '../features/stats/statsSlice';
-import { adminAPI } from '../api/axios';
+import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
+import {
+  fetchCandidateVerifications,
+  verifyCandidate,
+  selectCvList,
+  selectCvPagination,
+  selectCvLoading,
+  selectCvError,
+  selectCvActionLoading,
+  selectCvActionError,
+  clearCandidateVerificationErrors,
+} from '../features/candidateVerifications/candidateVerificationsSlice';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -15,76 +24,40 @@ const statIconSize = 'w-5 h-5';
 
 export default function CandidateVerification() {
   const dispatch = useDispatch();
+  const list = useSelector(selectCvList);
+  const pagination = useSelector(selectCvPagination);
+  const loading = useSelector(selectCvLoading);
+  const error = useSelector(selectCvError);
+  const actionLoading = useSelector(selectCvActionLoading);
+  const actionError = useSelector(selectCvActionError);
 
-  const [list, setList] = useState([]);
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0,
-    itemsPerPage: 10,
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [actionLoading, setActionLoading] = useState(null);
-
-  const [filter, setFilter] = useState('pending'); // pending | verified | unverified
+  const [filter, setFilter] = useState('pending');
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await adminAPI.getCandidateVerificationRequests({
+  const load = useCallback(() => {
+    dispatch(
+      fetchCandidateVerifications({
         page,
         limit: perPage,
         status: filter,
-      });
-      setList(res.data?.data ?? []);
-      setPagination(
-        res.data?.pagination ?? {
-          currentPage: 1,
-          totalPages: 1,
-          totalItems: 0,
-          itemsPerPage: perPage,
-        },
-      );
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          'Failed to load candidate verification requests.',
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [page, perPage, filter]);
-
-  useEffect(() => {
-    dispatch(fetchStats());
-  }, [dispatch]);
+      })
+    );
+  }, [dispatch, page, perPage, filter]);
 
   useEffect(() => {
     load();
   }, [load]);
 
   const handleVerify = async (cvId) => {
-    setActionLoading(cvId);
-    try {
-      await adminAPI.verifyCandidateRequest(cvId);
-      setList((prev) =>
-        prev.map((item) =>
-          item.id === cvId
-            ? { ...item, status: 'verified', isVerified: true }
-            : item,
-        ),
-      );
+    const result = await dispatch(verifyCandidate(cvId));
+    if (verifyCandidate.fulfilled.match(result)) {
       toast.success('User approved successfully');
-    } catch (err) {
+    } else {
       toast.error(
-        err.response?.data?.message || 'Failed to approve user request.',
+        result.payload ||
+          'Failed to approve user request.',
       );
-    } finally {
-      setActionLoading(null);
     }
   };
 
@@ -157,10 +130,14 @@ export default function CandidateVerification() {
         </button>
       </div>
 
-      {error && (
+      {(error || actionError) && (
         <div className="rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 p-4 text-sm flex items-center justify-between">
-          <span>{error}</span>
-          <Button size="sm" variant="ghost" onClick={() => setError(null)}>
+          <span>{error || actionError}</span>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => dispatch(clearCandidateVerificationErrors())}
+          >
             Dismiss
           </Button>
         </div>

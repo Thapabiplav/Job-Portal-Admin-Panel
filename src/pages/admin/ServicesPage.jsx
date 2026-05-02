@@ -1,9 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { Card, CardHeader } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Pagination } from "../../components/ui/Pagination";
 import { adminAPI } from "../../api/axios";
+import {
+  fetchServiceBookings,
+  updateServiceBookingStatusThunk,
+  selectServiceBookingsList,
+  selectServiceBookingsPagination,
+  selectServiceBookingsLoading,
+  selectServiceBookingsError,
+  selectServiceBookingsActionLoading,
+  selectServiceBookingsActionError,
+  clearServiceBookingsError,
+} from "../../features/serviceBookings/serviceBookingsSlice";
 
 const STATUS_OPTIONS = ["pending", "confirmed", "in_progress", "completed", "cancelled"];
 
@@ -59,52 +71,44 @@ const buildServiceWhatsAppText = (booking) => {
 };
 
 export default function ServicesPage() {
-  const [bookings, setBookings] = useState([]);
-  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 10 });
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const bookings = useSelector(selectServiceBookingsList);
+  const pagination = useSelector(selectServiceBookingsPagination);
+  const loading = useSelector(selectServiceBookingsLoading);
+  const fetchError = useSelector(selectServiceBookingsError);
+  const updatingId = useSelector(selectServiceBookingsActionLoading);
+  const actionError = useSelector(selectServiceBookingsActionError);
+
   const [statusFilter, setStatusFilter] = useState("");
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const [updatingId, setUpdatingId] = useState(null);
   const [mailingId, setMailingId] = useState(null);
 
-  const loadServiceBookings = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await adminAPI.getServiceBookings({
+  const loadServiceBookings = useCallback(() => {
+    dispatch(
+      fetchServiceBookings({
         page,
         limit: perPage,
         ...(statusFilter ? { status: statusFilter } : {}),
         ...(appliedSearch.trim() ? { search: appliedSearch.trim() } : {}),
-      });
-      setBookings(res.data?.data || []);
-      setPagination(res.data?.pagination || { currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: perPage });
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to load service bookings.");
-    } finally {
-      setLoading(false);
-    }
-  }, [appliedSearch, page, perPage, statusFilter]);
+      })
+    );
+  }, [dispatch, appliedSearch, page, perPage, statusFilter]);
 
   useEffect(() => {
     loadServiceBookings();
   }, [loadServiceBookings]);
 
   const updateStatus = async (id, nextStatus) => {
-    try {
-      setUpdatingId(id);
-      const res = await adminAPI.updateServiceBookingStatus(id, nextStatus);
-      const updated = res.data?.data;
-      setBookings((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, status: updated?.status || nextStatus } : item)),
-      );
+    const result = await dispatch(
+      updateServiceBookingStatusThunk({ id, nextStatus })
+    );
+    if (updateServiceBookingStatusThunk.fulfilled.match(result)) {
       toast.success(`Booking ${titleCase(nextStatus)} successfully.`);
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to update booking.");
-    } finally {
-      setUpdatingId(null);
+    } else {
+      toast.error(result.payload || "Failed to update booking.");
     }
   };
 
@@ -140,6 +144,15 @@ export default function ServicesPage() {
         <h1 className="text-xl sm:text-2xl font-bold text-accent tracking-tight">Services</h1>
         <p className="text-text-primary text-sm mt-1">Manage service bookings and update workflow.</p>
       </div>
+
+      {(fetchError || actionError) && (
+        <div className="rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 p-4 text-sm flex items-center justify-between">
+          <span>{fetchError || actionError}</span>
+          <Button size="sm" variant="ghost" onClick={() => dispatch(clearServiceBookingsError())}>
+            Dismiss
+          </Button>
+        </div>
+      )}
 
       <Card>
         <div className="flex flex-col lg:flex-row gap-3">

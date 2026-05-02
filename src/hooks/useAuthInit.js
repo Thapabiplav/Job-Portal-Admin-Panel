@@ -1,11 +1,15 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchMe } from '../features/auth/authSlice';
+import { bootstrapAuth } from '../features/auth/authSlice';
 
-/** Restore session if this browser has logged in before (hint + tokens / cookie refresh). */
+let adminAuthBootStarted = false;
+
+/** Restore session: legacy storage cleanup, HttpOnly refresh cookie → access in memory, then /auth/me. */
 export function useAuthInit() {
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(fetchMe());
+    if (adminAuthBootStarted) return;
+    adminAuthBootStarted = true;
+    dispatch(bootstrapAuth());
   }, [dispatch]);
 }

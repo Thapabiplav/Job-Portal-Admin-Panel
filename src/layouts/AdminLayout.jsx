@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import { logout } from '../features/auth/authSlice';
+import { fetchStats } from '../features/stats/statsSlice';
 import { AppHeader } from '../components/layouts/AppHeader';
 import { Sidebar } from '../components/navigation/Sidebar';
 import { BottomNav } from '../components/navigation/BottomNav';
@@ -49,6 +50,10 @@ export default function AdminLayout() {
     el.addEventListener('scroll', onMainScroll, { passive: true });
     return () => el.removeEventListener('scroll', onMainScroll);
   }, [onMainScroll]);
+
+  useEffect(() => {
+    dispatch(fetchStats());
+  }, [dispatch]);
 
   const handleViewSite = () => {
     const base = import.meta.env.VITE_CLIENT_URL || window.location.origin;

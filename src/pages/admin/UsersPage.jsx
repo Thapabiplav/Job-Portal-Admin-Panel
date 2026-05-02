@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchUsers,
@@ -7,12 +7,10 @@ import {
   selectUsersList,
   selectUsersPagination,
   selectUsersLoading,
-  selectUsersError,
   selectUsersActionLoading,
   selectUsersActionError,
   clearUsersError,
 } from '../../features/users/usersSlice';
-import { fetchStats } from '../../features/stats/statsSlice';
 import { selectStats } from '../../features/stats/statsSlice';
 import toast from 'react-hot-toast';
 import { Card, CardHeader } from '../../components/ui/Card';
@@ -34,17 +32,21 @@ export default function UsersPage() {
   const list = useSelector(selectUsersList);
   const pagination = useSelector(selectUsersPagination);
   const loading = useSelector(selectUsersLoading);
-  const error = useSelector(selectUsersError);
   const actionLoading = useSelector(selectUsersActionLoading);
   const actionError = useSelector(selectUsersActionError);
   const stats = useSelector(selectStats);
 
   const [search, setSearch] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [roleModal, setRoleModal] = useState(null);
   const [deleteModal, setDeleteModal] = useState(null);
+  const actionErrorRef = useRef(actionError);
+  useEffect(() => {
+    actionErrorRef.current = actionError;
+  }, [actionError]);
 
   const load = useCallback(() => {
     dispatch(
@@ -52,21 +54,18 @@ export default function UsersPage() {
         page,
         limit: perPage,
         ...(roleFilter && { role: roleFilter }),
-        ...(search.trim() && { search: search.trim() }),
+        ...(appliedSearch.trim() && { search: appliedSearch.trim() }),
       })
     );
-  }, [dispatch, page, perPage, roleFilter, search]);
+  }, [dispatch, page, perPage, roleFilter, appliedSearch]);
 
-  useEffect(() => {
-    dispatch(fetchStats());
-  }, [dispatch]);
   useEffect(() => {
     load();
   }, [load]);
 
   useEffect(() => {
-    if (actionError) dispatch(clearUsersError());
-  }, [roleModal, deleteModal]);
+    if (actionErrorRef.current) dispatch(clearUsersError());
+  }, [dispatch, roleModal, deleteModal]);
 
   const handleRoleSubmit = async () => {
     if (!roleModal?.id || !roleModal?.newRole) return;
@@ -117,7 +116,13 @@ export default function UsersPage() {
             placeholder="Search by name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && setPage(1) && load()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                setPage(1);
+                setAppliedSearch(search.trim());
+              }
+            }}
             className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-input border border-white/10 text-text-primary placeholder-text-muted focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-ui"
           />
           <select
@@ -134,14 +139,7 @@ export default function UsersPage() {
             variant="primary"
             onClick={() => {
               setPage(1);
-              dispatch(
-                fetchUsers({
-                  page: 1,
-                  limit: perPage,
-                  ...(roleFilter && { role: roleFilter }),
-                  ...(search.trim() && { search: search.trim() }),
-                })
-              );
+              setAppliedSearch(search.trim());
             }}
             disabled={loading}
           >

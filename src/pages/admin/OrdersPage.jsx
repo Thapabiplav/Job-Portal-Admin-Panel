@@ -1,10 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { X } from 'lucide-react';
 import { Card, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Pagination } from '../../components/ui/Pagination';
 import { adminAPI } from '../../api/axios';
+import {
+  fetchAdminOrders,
+  updateAdminOrderStatus,
+  selectAdminOrdersList,
+  selectAdminOrdersPagination,
+  selectAdminOrdersLoading,
+  selectAdminOrdersError,
+  selectAdminOrdersActionLoading,
+  selectAdminOrdersActionError,
+  clearAdminOrdersError,
+} from '../../features/adminOrders/adminOrdersSlice';
 
 const STATUS_OPTIONS = [
   'pending',
@@ -63,66 +75,45 @@ const buildWhatsAppText = (order) => {
 };
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState([]);
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalItems: 0,
-    itemsPerPage: 10,
-  });
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const orders = useSelector(selectAdminOrdersList);
+  const pagination = useSelector(selectAdminOrdersPagination);
+  const loading = useSelector(selectAdminOrdersLoading);
+  const fetchError = useSelector(selectAdminOrdersError);
+  const updatingOrderId = useSelector(selectAdminOrdersActionLoading);
+  const actionError = useSelector(selectAdminOrdersActionError);
+
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const [updatingOrderId, setUpdatingOrderId] = useState(null);
   const [pendingAction, setPendingAction] = useState(null);
   const [mailingOrderId, setMailingOrderId] = useState(null);
 
-  const loadOrders = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await adminAPI.getOrders({
+  const loadOrders = useCallback(() => {
+    dispatch(
+      fetchAdminOrders({
         page,
         limit: perPage,
         ...(statusFilter ? { status: statusFilter } : {}),
-        ...(search.trim() ? { search: search.trim() } : {}),
-      });
-      setOrders(res.data?.data || []);
-      setPagination(
-        res.data?.pagination || {
-          currentPage: 1,
-          totalPages: 1,
-          totalItems: 0,
-          itemsPerPage: perPage,
-        },
-      );
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'Failed to load orders.');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, perPage, search, statusFilter]);
+        ...(appliedSearch.trim() ? { search: appliedSearch.trim() } : {}),
+      })
+    );
+  }, [dispatch, page, perPage, appliedSearch, statusFilter]);
 
   useEffect(() => {
     loadOrders();
   }, [loadOrders]);
 
   const handleStatusUpdate = async (orderId, nextStatus) => {
-    try {
-      setUpdatingOrderId(orderId);
-      const res = await adminAPI.updateOrderStatus(orderId, nextStatus);
-      const updated = res.data?.data;
-      setOrders((prev) =>
-        prev.map((item) =>
-          item.id === orderId ? { ...item, status: updated?.status || nextStatus } : item,
-        ),
-      );
+    const result = await dispatch(
+      updateAdminOrderStatus({ orderId, nextStatus })
+    );
+    if (updateAdminOrderStatus.fulfilled.match(result)) {
       toast.success(`Order ${titleCase(nextStatus)} successfully.`);
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'Failed to update order.');
-    } finally {
-      setUpdatingOrderId(null);
+    } else {
+      toast.error(result.payload || 'Failed to update order.');
     }
   };
 
@@ -172,12 +163,28 @@ export default function OrdersPage() {
         </p>
       </div>
 
+      {(fetchError || actionError) && (
+        <div className="rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 p-4 text-sm flex items-center justify-between">
+          <span>{fetchError || actionError}</span>
+          <Button size="sm" variant="ghost" onClick={() => dispatch(clearAdminOrdersError())}>
+            Dismiss
+          </Button>
+        </div>
+      )}
+
       <Card>
         <div className="flex flex-col lg:flex-row gap-3">
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                setPage(1);
+                setAppliedSearch(search.trim());
+              }
+            }}
             placeholder="Search by order ID, buyer name, or buyer email..."
             className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-input border border-white/10 text-text-primary placeholder-text-muted focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-ui"
           />
@@ -200,7 +207,7 @@ export default function OrdersPage() {
             variant="primary"
             onClick={() => {
               setPage(1);
-              loadOrders();
+              setAppliedSearch(search.trim());
             }}
             disabled={loading}
           >

@@ -10,7 +10,6 @@ import {
   selectCompaniesActionLoading,
   clearCompaniesError,
 } from '../../features/companies/companiesSlice';
-import { fetchStats } from '../../features/stats/statsSlice';
 import { selectStats } from '../../features/stats/statsSlice';
 import toast from 'react-hot-toast';
 import { Card } from '../../components/ui/Card';
@@ -43,9 +42,6 @@ export default function CompaniesPage() {
     dispatch(fetchOrganizations(params));
   }, [dispatch, page, perPage, filter]);
 
-  useEffect(() => {
-    dispatch(fetchStats());
-  }, [dispatch]);
   useEffect(() => {
     load();
   }, [load]);

@@ -1,5 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { adminAPI } from '../../api/axios';
+import { logout } from '../auth/authSlice';
+
+function jobsListQueryKey(params) {
+  if (!params || typeof params !== 'object') return '{}';
+  const { page = 1, limit = 10, search } = params;
+  return JSON.stringify({
+    page: Number(page) || 1,
+    limit: Number(limit) || 10,
+    search: search ? String(search).trim() : '',
+  });
+}
 
 export const fetchJobs = createAsyncThunk(
   'jobs/fetchJobs',
@@ -13,6 +24,13 @@ export const fetchJobs = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Failed to load jobs.');
     }
+  },
+  {
+    condition: (params, { getState }) => {
+      const key = jobsListQueryKey(params);
+      if (getState().jobs.lastListQueryKey === key) return false;
+      return true;
+    },
   }
 );
 
@@ -31,6 +49,7 @@ export const deleteJob = createAsyncThunk(
 const initialState = {
   list: [],
   pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: 10 },
+  lastListQueryKey: null,
   isLoading: false,
   error: null,
   actionLoading: null,
@@ -52,9 +71,11 @@ const jobsSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(fetchJobs.fulfilled, (state, { payload }) => {
+      .addCase(fetchJobs.fulfilled, (state, action) => {
+        const { payload } = action;
         state.list = payload.data ?? [];
         state.pagination = payload.pagination ?? state.pagination;
+        state.lastListQueryKey = jobsListQueryKey(action.meta.arg);
         state.isLoading = false;
         state.error = null;
       })
@@ -74,7 +95,8 @@ const jobsSlice = createSlice({
       .addCase(deleteJob.rejected, (state, { payload }) => {
         state.actionLoading = null;
         state.actionError = payload;
-      });
+      })
+      .addCase(logout.fulfilled, () => ({ ...initialState }));
   },
 });
 

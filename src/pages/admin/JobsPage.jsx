@@ -10,7 +10,6 @@ import {
   selectJobsActionLoading,
   clearJobsError,
 } from '../../features/jobs/jobsSlice';
-import { fetchStats } from '../../features/stats/statsSlice';
 import { selectStats } from '../../features/stats/statsSlice';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -46,6 +45,7 @@ export default function JobsPage() {
   const stats = useSelector(selectStats);
 
   const [search, setSearch] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [deleteModal, setDeleteModal] = useState(null);
@@ -56,14 +56,11 @@ export default function JobsPage() {
       fetchJobs({
         page,
         limit: perPage,
-        ...(search.trim() && { search: search.trim() }),
+        ...(appliedSearch.trim() && { search: appliedSearch.trim() }),
       })
     );
-  }, [dispatch, page, perPage, search]);
+  }, [dispatch, page, perPage, appliedSearch]);
 
-  useEffect(() => {
-    dispatch(fetchStats());
-  }, [dispatch]);
   useEffect(() => {
     load();
   }, [load]);
@@ -101,20 +98,20 @@ export default function JobsPage() {
             placeholder="Search by title or company..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (setPage(1), load())}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                setPage(1);
+                setAppliedSearch(search.trim());
+              }
+            }}
             className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-input border border-white/10 text-text-primary placeholder-text-muted focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-ui"
           />
           <Button
             variant="primary"
             onClick={() => {
               setPage(1);
-              dispatch(
-                fetchJobs({
-                  page: 1,
-                  limit: perPage,
-                  ...(search.trim() && { search: search.trim() }),
-                })
-              );
+              setAppliedSearch(search.trim());
             }}
             disabled={loading}
           >

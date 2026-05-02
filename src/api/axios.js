@@ -2,9 +2,7 @@ import axios from 'axios';
 import {
   clearAllTokens,
   getAccessToken,
-  getRefreshToken,
   setAccessToken,
-  setRefreshToken,
 } from '../utils/authStore';
 
 const API_BASE_URL =
@@ -52,11 +50,8 @@ api.interceptors.response.use(
     originalRequest._retry = true;
     try {
       if (!refreshPromise) {
-        const rt = getRefreshToken();
-        const refreshPayload = rt ? { refresh_token: rt } : {};
-        const refreshConfig = rt ? { headers: { 'X-Refresh-Token': rt } } : undefined;
         refreshPromise = api
-          .post('/auth/refresh', refreshPayload, refreshConfig)
+          .post('/auth/refresh', {})
           .then((res) => res)
           .catch((err) => {
             refreshPromise = null;
@@ -69,8 +64,6 @@ api.interceptors.response.use(
         const newAccess =
           refreshRes?.data?.access_token || refreshRes?.data?.accessToken || null;
         if (newAccess) setAccessToken(newAccess);
-        const newRt = refreshRes?.data?.refresh_token || null;
-        if (newRt) setRefreshToken(newRt);
         return api(originalRequest);
       }
     } catch (refreshErr) {
@@ -85,12 +78,7 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   logout: () => api.post('/auth/logout'),
-  refresh: () => {
-    const rt = getRefreshToken();
-    const payload = rt ? { refresh_token: rt } : {};
-    const cfg = rt ? { headers: { 'X-Refresh-Token': rt } } : undefined;
-    return api.post('/auth/refresh', payload, cfg);
-  },
+  refresh: () => api.post('/auth/refresh', {}),
   getMe: () => api.get('/auth/me'),
 };
 

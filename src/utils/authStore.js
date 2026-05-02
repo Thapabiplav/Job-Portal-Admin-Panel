@@ -1,76 +1,65 @@
 /**
- * Admin SPA: access + refresh in sessionStorage (Bearer for /auth/me); HttpOnly refresh cookie also used.
- * Session hint avoids calling /auth/me on first visit when no prior login on this browser.
+ * Admin auth client storage:
+ * - Access JWT: in-memory only (never sessionStorage/localStorage).
+ * - Refresh: HttpOnly cookie set by the API on login (path /api/auth/refresh); not readable from JS.
+ * - Session probe: first-party cookie (no secret) so we know to try /auth/refresh after a full page load.
  */
-const ACCESS_KEY = 'admin_access_token';
-const REFRESH_KEY = 'admin_refresh_token';
-const SESSION_HINT_KEY = 'admin_session_hint';
 
-export function getAccessToken() {
-  try {
-    const v = sessionStorage.getItem(ACCESS_KEY);
-    return v && String(v).trim() ? String(v).trim() : null;
-  } catch {
-    return null;
-  }
+const PROBE_COOKIE = 'admin_session_probe';
+
+/** @type {{ accessToken: string | null }} */
+const session = { accessToken: null };
+
+function isSecureCookieContext() {
+  if (typeof window === 'undefined') return false;
+  return window.location.protocol === 'https:' || Boolean(import.meta.env.PROD);
 }
 
-export function setAccessToken(token) {
+/** Remove legacy token keys from sessionStorage / localStorage (one-time migration). */
+export function clearLegacyAuthStorage() {
   try {
-    const v = typeof token === 'string' && token.trim() ? token.trim() : null;
-    if (v) sessionStorage.setItem(ACCESS_KEY, v);
-    else sessionStorage.removeItem(ACCESS_KEY);
-  } catch {
-    /* private mode */
-  }
-}
-
-export function getRefreshToken() {
-  try {
-    const v = sessionStorage.getItem(REFRESH_KEY);
-    return v && String(v).trim() ? String(v).trim() : null;
-  } catch {
-    return null;
-  }
-}
-
-export function setRefreshToken(token) {
-  try {
-    const v = typeof token === 'string' && token.trim() ? token.trim() : null;
-    if (v) sessionStorage.setItem(REFRESH_KEY, v);
-    else sessionStorage.removeItem(REFRESH_KEY);
-  } catch {
-    /* private mode */
-  }
-}
-
-export function setAdminSessionHint() {
-  try {
-    sessionStorage.setItem(SESSION_HINT_KEY, '1');
-    localStorage.setItem('admin_auth_hint', '1');
-  } catch {
-    /* ignore */
-  }
-}
-
-export function hasAdminSessionHint() {
-  try {
-    if (sessionStorage.getItem(SESSION_HINT_KEY) === '1') return true;
-    if (localStorage.getItem('admin_auth_hint') === '1') return true;
-    return false;
-  } catch {
-    return false;
-  }
-}
-
-export function clearAllTokens() {
-  try {
-    sessionStorage.removeItem(ACCESS_KEY);
-    sessionStorage.removeItem(REFRESH_KEY);
-    sessionStorage.removeItem(SESSION_HINT_KEY);
+    sessionStorage.removeItem('admin_access_token');
+    sessionStorage.removeItem('admin_refresh_token');
+    sessionStorage.removeItem('admin_session_hint');
     sessionStorage.removeItem('admin_user');
     localStorage.removeItem('admin_auth_hint');
   } catch {
     /* ignore */
   }
+}
+
+export function getAccessToken() {
+  const v = session.accessToken;
+  return v && String(v).trim() ? String(v).trim() : null;
+}
+
+export function setAccessToken(token) {
+  const v = typeof token === 'string' && token.trim() ? token.trim() : null;
+  session.accessToken = v;
+}
+
+export function setSessionProbe() {
+  if (typeof document === 'undefined') return;
+  const maxAge = 60 * 60 * 24 * 7;
+  const parts = [`${PROBE_COOKIE}=1`, 'Path=/', `Max-Age=${maxAge}`, 'SameSite=Lax'];
+  if (isSecureCookieContext()) parts.push('Secure');
+  document.cookie = parts.join('; ');
+}
+
+export function hasSessionProbe() {
+  if (typeof document === 'undefined') return false;
+  return document.cookie.split(';').some((c) => c.trim().startsWith(`${PROBE_COOKIE}=`));
+}
+
+export function clearSessionProbe() {
+  if (typeof document === 'undefined') return;
+  const parts = [`${PROBE_COOKIE}=`, 'Path=/', 'Max-Age=0', 'SameSite=Lax'];
+  if (isSecureCookieContext()) parts.push('Secure');
+  document.cookie = parts.join('; ');
+}
+
+export function clearAllTokens() {
+  session.accessToken = null;
+  clearSessionProbe();
+  clearLegacyAuthStorage();
 }
