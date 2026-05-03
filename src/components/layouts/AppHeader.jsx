@@ -16,7 +16,7 @@ export function AppHeader({ onMenuClick }) {
         <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
       <h1 className="text-lg sm:text-xl font-semibold text-text-primary truncate tracking-tight">
-        Sindhuli Bazar JobPortal Admin Panel
+        Sindhuli Bazar  Admin Panel
       </h1>
       <div className="w-10 lg:hidden" aria-hidden />
     </header>

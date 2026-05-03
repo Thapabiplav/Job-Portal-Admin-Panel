@@ -13,7 +13,7 @@ import {
 } from '../../features/users/usersSlice';
 import { selectStats } from '../../features/stats/statsSlice';
 import toast from 'react-hot-toast';
-import { Card, CardHeader } from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/modals/Modal';
 import { Pagination } from '../../components/ui/Pagination';
@@ -21,7 +21,8 @@ import { RoleBadge } from '../../components/ui/RoleBadge';
 import { Avatar } from '../../components/ui/Avatar';
 import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { Lock, FileText, Trash2, Users, UserCircle, Building2 } from 'lucide-react';
+import { Lock, FileText, Trash2, Users, UserCircle, Building2, Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { MobileDetailEyeButton } from '../../components/mobile/MobileDetailEyeButton';
 
 const CLIENT_BASE = import.meta.env.VITE_CLIENT_URL || (typeof window !== 'undefined' ? window.location.origin : '');
 
@@ -43,6 +44,7 @@ export default function UsersPage() {
   const [perPage, setPerPage] = useState(10);
   const [roleModal, setRoleModal] = useState(null);
   const [deleteModal, setDeleteModal] = useState(null);
+  const [expandedUserId, setExpandedUserId] = useState(null);
   const actionErrorRef = useRef(actionError);
   useEffect(() => {
     actionErrorRef.current = actionError;
@@ -62,6 +64,10 @@ export default function UsersPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    setExpandedUserId(null);
+  }, [page, appliedSearch, roleFilter]);
 
   useEffect(() => {
     if (actionErrorRef.current) dispatch(clearUsersError());
@@ -103,48 +109,103 @@ export default function UsersPage() {
         <p className="text-text-primary text-sm mt-1">Manage accounts and roles — candidates, employers, and admins</p>
       </div>
 
-      <section className="grid grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-4">
-        <StatCard title="Total Users" value={userStats.total ?? 0} icon={<Users className={statIconSize} />} />
-        <StatCard title="Total Candidates" value={userStats.candidates ?? 0} icon={<UserCircle className={statIconSize} />} />
-        <StatCard title="Total Employers" value={userStats.employers ?? 0} icon={<Building2 className={statIconSize} />} />
+      <section className="grid grid-cols-3 gap-2 md:gap-4">
+        <StatCard
+          compact
+          title={
+            <>
+              <span className="md:hidden">Users</span>
+              <span className="hidden md:inline">Total Users</span>
+            </>
+          }
+          value={userStats.total ?? 0}
+          icon={<Users className={statIconSize} />}
+        />
+        <StatCard
+          compact
+          title={
+            <>
+              <span className="md:hidden">Candidates</span>
+              <span className="hidden md:inline">Total Candidates</span>
+            </>
+          }
+          value={userStats.candidates ?? 0}
+          icon={<UserCircle className={statIconSize} />}
+        />
+        <StatCard
+          compact
+          title={
+            <>
+              <span className="md:hidden">Employers</span>
+              <span className="hidden md:inline">Total Employers</span>
+            </>
+          }
+          value={userStats.employers ?? 0}
+          icon={<Building2 className={statIconSize} />}
+        />
       </section>
 
-      <Card>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <input
-            type="search"
-            placeholder="Search by name or email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                setPage(1);
-                setAppliedSearch(search.trim());
-              }
-            }}
-            className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-input border border-white/10 text-text-primary placeholder-text-muted focus:ring-2 focus:ring-accent focus:border-accent outline-none transition-ui"
-          />
-          <select
-            value={roleFilter}
-            onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-            className="px-4 py-3 rounded-xl border border-white/10 bg-input text-text-primary min-h-[44px] focus:ring-2 focus:ring-accent transition-ui"
-          >
-            <option value="">All roles</option>
-            <option value="candidate">Candidate</option>
-            <option value="employer">Employer</option>
-            <option value="superadmin">Super Admin</option>
-          </select>
-          <Button
-            variant="primary"
-            onClick={() => {
-              setPage(1);
-              setAppliedSearch(search.trim());
-            }}
-            disabled={loading}
-          >
-            Search
-          </Button>
+      <Card
+        padding={false}
+        className="border-white/[0.07] bg-linear-to-b from-white/[0.04] to-transparent p-3 sm:p-5"
+      >
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <div className="flex items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-3 py-2 text-text-secondary ring-1 ring-white/10 sm:justify-start sm:bg-transparent sm:px-0 sm:py-0 sm:ring-0">
+            <SlidersHorizontal className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+            <span className="text-[11px] font-semibold uppercase tracking-wide sm:text-xs">Search &amp; filter</span>
+          </div>
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-stretch sm:gap-3">
+            <div className="relative min-w-0 flex-1">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 z-1 h-4 w-4 -translate-y-1/2 text-text-muted" aria-hidden />
+              <input
+                type="search"
+                placeholder="Name or email..."
+                inputMode="search"
+                enterKeyHint="search"
+                autoComplete="off"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    setPage(1);
+                    setAppliedSearch(search.trim());
+                  }
+                }}
+                className="w-full min-h-[44px] rounded-2xl border border-white/10 bg-input py-2.5 pl-11 pr-4 text-sm text-text-primary placeholder:text-text-muted shadow-inner shadow-black/25 outline-none transition-ui focus:border-accent/35 focus:ring-[3px] focus:ring-accent/20 sm:rounded-xl"
+              />
+            </div>
+            <div className="flex min-h-[44px] gap-2 sm:contents">
+              <div className="relative min-w-0 flex-1 sm:w-44 sm:shrink-0">
+                <select
+                  value={roleFilter}
+                  aria-label="Filter by role"
+                  onChange={(e) => {
+                    setRoleFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="h-full min-h-[44px] w-full cursor-pointer appearance-none rounded-2xl border border-white/10 bg-input py-2.5 pl-3.5 pr-10 text-sm text-text-primary shadow-inner shadow-black/25 outline-none transition-ui focus:border-accent/35 focus:ring-[3px] focus:ring-accent/20 sm:rounded-xl sm:pl-4"
+                >
+                  <option value="">All roles</option>
+                  <option value="candidate">Candidate</option>
+                  <option value="employer">Employer</option>
+                  <option value="superadmin">Super Admin</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" aria-hidden />
+              </div>
+              <Button
+                variant="primary"
+                className="min-h-[44px] shrink-0 min-w-28 rounded-2xl px-4 max-sm:flex-none sm:rounded-xl sm:px-5"
+                onClick={() => {
+                  setPage(1);
+                  setAppliedSearch(search.trim());
+                }}
+                disabled={loading}
+              >
+                Search
+              </Button>
+            </div>
+          </div>
         </div>
       </Card>
 
@@ -194,7 +255,7 @@ export default function UsersPage() {
                         <RoleBadge role={u.role} />
                       </td>
                       <td className="py-3 px-4 border-r-0">
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-x-4 gap-y-3">
                           {!isSuperAdmin(u) && (
                             <Button
                               size="sm"
@@ -228,7 +289,9 @@ export default function UsersPage() {
                               variant="danger"
                               onClick={() => setDeleteModal({ id: u.id, name: u.name })}
                               disabled={actionLoading === u.id}
+                              className="inline-flex items-center gap-1.5"
                             >
+                              <Trash2 className="w-4 h-4 shrink-0" aria-hidden />
                               Delete
                             </Button>
                           )}
@@ -241,61 +304,104 @@ export default function UsersPage() {
             </div>
 
             <div className="md:hidden divide-y divide-white/5">
-              {list.map((u) => (
-                <div key={u.id} className="p-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar name={u.name} email={u.email} size="lg" />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-text-primary">{u.name}</p>
-                      <p className="text-sm text-text-secondary truncate">{u.email}</p>
-                      <div className="mt-1.5">
-                        <RoleBadge role={u.role} />
+              {list.map((u) => {
+                const expanded = expandedUserId === u.id;
+                return (
+                  <div key={u.id} className="p-4">
+                    <div className="flex items-start gap-3">
+                      <Avatar name={u.name} email={u.email} size="lg" />
+                      <div className="min-w-0 flex-1 pt-0.5">
+                        <p className="font-semibold text-text-primary">{u.name}</p>
+                        <div className="mt-1.5">
+                          <RoleBadge role={u.role} />
+                        </div>
                       </div>
+                      <MobileDetailEyeButton
+                        expanded={expanded}
+                        onClick={() =>
+                          setExpandedUserId((id) => (id === u.id ? null : u.id))
+                        }
+                        aria-label={expanded ? 'Hide email and actions' : 'Show email and actions'}
+                      />
                     </div>
+                    {expanded && (
+                      <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 space-y-4">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+                            Email:
+                          </span>
+                          <span
+                            className="min-w-0 flex-1 truncate text-sm text-text-primary"
+                            title={u.email}
+                          >
+                            {u.email}
+                          </span>
+                        </div>
+                        <div className="pt-3 border-t border-white/10">
+                          {isSuperAdmin(u) ? (
+                            <div className="flex justify-center">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-text-muted bg-white/5 min-h-[44px]">
+                                <Lock className="w-4 h-4 shrink-0" aria-hidden />
+                                Locked
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-3 gap-x-2 gap-y-2 items-center">
+                              <div className="flex justify-start min-w-0">
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  onClick={() =>
+                                    setRoleModal({
+                                      id: u.id,
+                                      name: u.name,
+                                      currentRole: u.role,
+                                      newRole: u.role,
+                                    })
+                                  }
+                                  disabled={actionLoading === 'role'}
+                                  className="min-h-[44px] max-w-full px-2.5 text-xs font-semibold sm:text-sm sm:px-3"
+                                >
+                                  <span className="truncate">Change role</span>
+                                </Button>
+                              </div>
+                              <div className="flex justify-center min-w-0">
+                                {u.cvSlug ? (
+                                  <a
+                                    href={cvUrl(u)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex max-w-full items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold sm:text-sm bg-hover text-text-primary min-h-[44px] hover:bg-white/10 transition-ui"
+                                  >
+                                    <FileText className="w-4 h-4 shrink-0" aria-hidden />
+                                    <span className="truncate">View CV</span>
+                                  </a>
+                                ) : (
+                                  <span className="inline-flex min-h-[44px] max-w-full items-center justify-center rounded-xl border border-white/5 bg-white/[0.02] px-2 text-[11px] font-medium text-text-muted">
+                                    No CV
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex justify-end min-w-0">
+                                <Button
+                                  size="sm"
+                                  variant="danger"
+                                  onClick={() => setDeleteModal({ id: u.id, name: u.name })}
+                                  disabled={actionLoading === u.id}
+                                  className="min-h-[44px] max-w-full px-2.5 text-xs font-semibold sm:text-sm sm:px-3 inline-flex items-center justify-center gap-1.5"
+                                >
+                                  <Trash2 className="w-4 h-4 shrink-0" aria-hidden />
+                                  <span className="truncate">Delete</span>
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {!isSuperAdmin(u) && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setRoleModal({ id: u.id, name: u.name, currentRole: u.role, newRole: u.role })}
-                        disabled={actionLoading === 'role'}
-                        className="min-h-[44px]"
-                      >
-                        Change role
-                      </Button>
-                    )}
-                    {isSuperAdmin(u) && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-text-muted bg-white/5 min-h-[44px]">
-                        <Lock className="w-4 h-4" />
-                        Locked
-                      </span>
-                    )}
-                    {u.cvSlug && (
-                      <a
-                        href={cvUrl(u)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium bg-hover text-text-primary min-h-[44px]"
-                      >
-                        <FileText className="w-4 h-4" />
-                        View CV
-                      </a>
-                    )}
-                    {!isSuperAdmin(u) && (
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => setDeleteModal({ id: u.id, name: u.name })}
-                        disabled={actionLoading === u.id}
-                        className="min-h-[44px]"
-                      >
-                        Delete
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {!loading && list.length === 0 && (

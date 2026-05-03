@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, Briefcase, FileText, Building2 } from 'lucide-react';
+import { Users, Briefcase, FileText, Building2, Package, ChevronRight } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStats, selectStats, selectStatsError } from '../../features/stats/statsSlice';
 import { Card, CardHeader } from '../../components/ui/Card';
@@ -7,7 +7,36 @@ import { StatCard } from '../../components/cards/StatCard';
 import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 
-const iconSize = "w-5 h-5";
+const iconSize = 'w-5 h-5';
+
+/** Matches mobile BottomNav paths in AdminLayout — listed routes already appear in the footer bar. */
+const MOBILE_FOOTER_PATHS = new Set([
+  '/admin/dashboard',
+  '/admin/companies',
+  '/admin/candidate-verifications',
+  '/admin/orders',
+]);
+
+const MOBILE_EXTRA_QUICK_LINKS = [
+  {
+    to: '/admin/users',
+    label: 'Users',
+    description: 'Accounts, roles, and profiles',
+    Icon: Users,
+  },
+  {
+    to: '/admin/jobs',
+    label: 'Jobs',
+    description: 'Moderate listings and applicants',
+    Icon: Briefcase,
+  },
+  {
+    to: '/admin/services',
+    label: 'Services',
+    description: 'Service bookings and workflow',
+    Icon: Package,
+  },
+].filter(({ to }) => !MOBILE_FOOTER_PATHS.has(to));
 
 export default function DashboardPage() {
   const dispatch = useDispatch();
@@ -32,9 +61,9 @@ export default function DashboardPage() {
           <Skeleton className="h-8 w-48 bg-white/10" />
           <Skeleton className="h-4 w-64 mt-2 bg-white/10" />
         </div>
-        <div className="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-20 sm:h-28 rounded-xl sm:rounded-2xl bg-white/10" />
+            <Skeleton key={i} className="h-22 sm:h-28 rounded-xl sm:rounded-2xl bg-white/10" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -59,7 +88,7 @@ export default function DashboardPage() {
         <p className="text-text-primary text-sm mt-1">Overview of your portal</p>
       </div>
 
-      <section className="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+      <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
         <StatCard
           title="Total Users"
           value={users.total ?? 0}
@@ -121,9 +150,16 @@ export default function DashboardPage() {
         </Card>
       </section>
 
-      <Card>
-        <CardHeader title="Quick actions" />
-        <div className="mt-4 flex flex-wrap gap-3">
+      <Card className="max-md:border-white/8">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold text-text-primary tracking-tight">Quick actions</h2>
+            <p className="text-xs text-text-muted mt-1 md:hidden leading-snug max-w-sm">
+              Screens not shown in the bottom navigation — tap below.
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 hidden md:flex md:flex-wrap md:gap-3">
           <Link to="/admin/users">
             <Button variant="primary">Manage Users</Button>
           </Link>
@@ -134,6 +170,27 @@ export default function DashboardPage() {
             <Button variant="secondary">Approve Companies</Button>
           </Link>
         </div>
+        <nav className="mt-3 md:hidden flex flex-col gap-3" aria-label="Additional navigation">
+          {MOBILE_EXTRA_QUICK_LINKS.map(({ to, label, description, Icon }) => (
+            <Link
+              key={to}
+              to={to}
+              className="group flex items-center gap-4 min-h-[56px] px-4 py-3 rounded-xl border border-white/10 bg-white/4 hover:bg-white/7 hover:border-white/15 active:scale-[0.99] transition-ui tap-feedback shadow-(--shadow-soft)"
+            >
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 border border-primary/25 text-accent">
+                <Icon className="w-5 h-5" aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1 text-left">
+                <p className="font-semibold text-text-primary leading-snug">{label}</p>
+                <p className="text-xs text-text-secondary mt-0.5 leading-snug line-clamp-2">{description}</p>
+              </div>
+              <ChevronRight
+                className="w-5 h-5 shrink-0 text-text-muted group-hover:text-accent transition-ui"
+                aria-hidden
+              />
+            </Link>
+          ))}
+        </nav>
       </Card>
     </div>
   );

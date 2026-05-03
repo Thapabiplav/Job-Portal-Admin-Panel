@@ -32,13 +32,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-start md:items-center justify-center bg-surface p-0 md:p-6">
+    <div className="min-h-[100dvh] md:min-h-screen bg-surface flex flex-col md:flex-row md:items-center md:justify-center px-4 md:p-6 max-md:pt-[max(1rem,env(safe-area-inset-top,0px))] max-md:pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]">
       <div
-        className="w-full max-w-[900px] bg-surface-soft rounded-none md:rounded-2xl overflow-hidden border border-white/5 flex flex-col md:flex-row md:min-h-[520px]"
+        className="w-full max-w-[900px] flex flex-col md:flex-row flex-1 md:flex-none min-h-0 bg-surface-soft rounded-none max-md:rounded-2xl md:rounded-2xl overflow-hidden border border-white/5 md:min-h-[520px]"
         style={{ boxShadow: 'var(--shadow-card)' }}
       >
         {/* Image Section */}
-        <div className="relative w-full h-[200px] md:w-1/2 md:h-auto md:shrink-0">
+        <div className="relative w-full shrink-0 h-[clamp(160px,28vh,220px)] md:h-auto md:max-h-none md:min-h-0 md:w-1/2">
           <img
             src="https://i.imgur.com/j59pDPg.jpeg"
             alt="Login Cover"
@@ -57,21 +57,21 @@ export default function LoginPage() {
         </div>
 
         {/* Form Section */}
-        <div className="w-full p-6 md:w-1/2 md:p-5 md:flex md:items-center md:justify-center bg-surface-soft border-t md:border-t-0 md:border-l border-white/5 rounded-b-2xl md:rounded-r-2xl overflow-y-auto">
-          <div className="w-full max-w-95 mx-auto">
+        <div className="w-full min-h-0 min-w-0 p-6 max-md:px-5 max-md:pt-4 max-md:pb-6 max-md:flex max-md:flex-1 max-md:flex-col max-md:justify-start max-md:overflow-y-auto md:w-1/2 md:p-5 md:flex md:items-center md:justify-center md:flex-none bg-surface-soft border-t md:border-t-0 md:border-l border-white/5 overscroll-y-contain">
+          <div className="w-full max-w-95 min-w-0 mx-auto">
             {/* Logo */}
-            <div className="flex items-center gap-3 mb-4 md:mb-2">
+            <div className="flex items-center gap-3 mb-3 md:mb-2">
               <div
                 className="w-9 h-9 rounded-xl bg-linear-to-br from-primary to-primary-darker text-white font-bold text-base flex items-center justify-center shrink-0"
                 style={{ boxShadow: 'var(--shadow-glow)' }}
               >
-                JP
+                SB
               </div>
-              <span className="text-text-primary text-lg font-semibold tracking-wide">Job Portal Admin</span>
+              <span className="text-text-primary text-lg font-semibold tracking-wide">Sindhuli Bazar Admin</span>
             </div>
 
             <h1 className="text-text-primary text-2xl md:text-xl font-semibold m-0 mb-2 md:mb-1">Login Account</h1>
-            <p className="text-text-secondary text-sm m-0 mb-6 md:mb-4">Please enter your credentials to continue</p>
+            <p className="text-text-secondary text-sm m-0 mb-5 md:mb-4">Please enter your credentials to continue</p>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-3">
               {error && (
@@ -111,7 +111,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-0 flex items-center text-text-muted hover:text-accent transition-ui"
+                  className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-0 flex items-center justify-center text-text-muted hover:text-accent transition-ui max-md:min-h-[44px] max-md:min-w-[44px] max-md:rounded-lg max-md:active:bg-white/5"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}

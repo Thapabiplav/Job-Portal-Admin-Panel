@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-export function Modal({ open, onClose, title, children, size = 'md' }) {
+export function Modal({ open, onClose, title, children, size = 'md', scrollable = false }) {
   useEffect(() => {
     if (!open) return;
     const handleEscape = (e) => e.key === 'Escape' && onClose();
@@ -26,12 +26,12 @@ export function Modal({ open, onClose, title, children, size = 'md' }) {
       onClick={onClose}
     >
       <div
-        className="bg-surface-soft rounded-2xl w-full overflow-hidden border border-white/5 transition-all duration-200"
+        className={`bg-surface-soft rounded-2xl w-full border border-white/5 transition-all duration-200 ${scrollable ? 'max-h-[90vh] flex flex-col overflow-hidden' : 'overflow-hidden'}`}
         style={{ boxShadow: 'var(--shadow-hover)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
-          <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/5">
+          <div className="flex shrink-0 items-center justify-between px-4 sm:px-6 py-4 border-b border-white/5">
             <h2 id="modal-title" className="text-lg font-semibold text-text-primary">
               {title}
             </h2>
@@ -45,7 +45,9 @@ export function Modal({ open, onClose, title, children, size = 'md' }) {
             </button>
           </div>
         )}
-        <div className={`px-4 sm:px-6 py-4 ${sizeClass} w-full mx-auto`}>
+        <div
+          className={`px-4 sm:px-6 py-4 ${sizeClass} w-full mx-auto ${scrollable ? 'min-h-0 max-h-[85vh] overflow-y-auto' : ''}`}
+        >
           {children}
         </div>
       </div>

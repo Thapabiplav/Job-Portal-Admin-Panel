@@ -13,14 +13,27 @@ import {
 import { selectStats } from '../../features/stats/statsSlice';
 import toast from 'react-hot-toast';
 import { Card } from '../../components/ui/Card';
+import { MobileDetailEyeButton } from '../../components/mobile/MobileDetailEyeButton';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Pagination } from '../../components/ui/Pagination';
 import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { Building2, Clock } from 'lucide-react';
+import { Building2, Clock, FileText, ShieldCheck } from 'lucide-react';
 
 const statIconSize = 'w-5 h-5';
+
+const verifyButtonClassName =
+  'gap-2 px-4 sm:px-5 font-semibold tracking-wide shadow-[0_4px_24px_rgba(167,139,250,0.35)] ring-2 ring-white/20 hover:ring-accent/50 hover:shadow-[0_6px_28px_rgba(167,139,250,0.45)] active:scale-[0.98] transition-transform';
+
+const CLIENT_BASE =
+  import.meta.env.VITE_CLIENT_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+
+const cvPublicUrl = (cvSlug) => {
+  if (!cvSlug) return null;
+  const base = String(CLIENT_BASE).replace(/\/+$/, '');
+  return `${base}/${String(cvSlug).replace(/^\/+/, '')}`;
+};
 
 export default function CompaniesPage() {
   const dispatch = useDispatch();
@@ -34,6 +47,7 @@ export default function CompaniesPage() {
   const [filter, setFilter] = useState(''); // '' | 'pending' | 'verified'
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
+  const [expandedOrgId, setExpandedOrgId] = useState(null);
 
   const load = useCallback(() => {
     const params = { page, limit: perPage };
@@ -45,6 +59,10 @@ export default function CompaniesPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    setExpandedOrgId(null);
+  }, [filter, page]);
 
   const handleVerify = async (orgId) => {
     const result = await dispatch(verifyOrganization(orgId));
@@ -70,9 +88,29 @@ export default function CompaniesPage() {
         <p className="text-text-primary text-sm mt-1">Verify organization profiles</p>
       </div>
 
-      <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-        <StatCard title="Total Approved Companies" value={approvedCount} icon={<Building2 className={statIconSize} />} />
-        <StatCard title="Pending Companies" value={pendingCount} icon={<Clock className={statIconSize} />} />
+      <section className="grid grid-cols-2 gap-2 md:gap-4">
+        <StatCard
+          compact
+          title={
+            <>
+              <span className="md:hidden">Approved</span>
+              <span className="hidden md:inline">Total Approved Companies</span>
+            </>
+          }
+          value={approvedCount}
+          icon={<Building2 className={statIconSize} />}
+        />
+        <StatCard
+          compact
+          title={
+            <>
+              <span className="md:hidden">Pending</span>
+              <span className="hidden md:inline">Pending Companies</span>
+            </>
+          }
+          value={pendingCount}
+          icon={<Clock className={statIconSize} />}
+        />
       </section>
 
       <div className="flex flex-wrap gap-2" role="tablist">
@@ -110,7 +148,9 @@ export default function CompaniesPage() {
                     <th className="text-left py-4 px-4 text-sm font-semibold text-accent rounded-tl-xl border-r border-accent/40">Organization</th>
                     <th className="text-left py-4 px-4 text-sm font-semibold text-accent border-r border-accent/40">Contact</th>
                     <th className="text-left py-4 px-4 text-sm font-semibold text-accent border-r border-accent/40">Status</th>
-                    <th className="text-left py-4 px-4 text-sm font-semibold text-accent rounded-tr-xl border-r-0">Actions</th>
+                    <th className="text-left py-4 px-4 text-sm font-semibold text-accent rounded-tr-xl border-r-0">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -120,7 +160,14 @@ export default function CompaniesPage() {
                         <span className="font-medium text-[#FFFFFF]">{org.companyName || '—'}</span>
                       </td>
                       <td className="py-3 px-4 text-[#FFFFFF] border-r border-accent/40">
-                        {org.user?.name || org.user?.email || '—'}
+                        <div className="space-y-1">
+                          <span className="block font-medium text-[#FFFFFF]">
+                            {org.user?.name || '—'}
+                          </span>
+                          <span className="block break-all text-sm text-text-secondary">
+                            {org.user?.email || '—'}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-3 px-4 border-r border-accent/40">
                         <Badge variant={org.isVerified ? 'success' : 'warning'}>
@@ -128,16 +175,33 @@ export default function CompaniesPage() {
                         </Badge>
                       </td>
                       <td className="py-3 px-4 border-r-0">
-                        {!org.isVerified && (
-                          <Button
-                            size="sm"
-                            variant="primary"
-                            onClick={() => handleVerify(org.id)}
-                            disabled={actionLoading === org.id}
-                          >
-                            Verify
-                          </Button>
-                        )}
+                        <div className="flex flex-wrap items-center gap-2">
+                          {org.user?.cvSlug && cvPublicUrl(org.user.cvSlug) ? (
+                            <a
+                              href={cvPublicUrl(org.user.cvSlug)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-hover px-3 py-2 text-sm font-medium text-text-primary transition-ui hover:bg-white/10"
+                            >
+                              <FileText className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+                              View CV
+                            </a>
+                          ) : (
+                            <span className="text-xs text-text-muted">No CV</span>
+                          )}
+                          {!org.isVerified && (
+                            <Button
+                              size="sm"
+                              variant="primary"
+                              onClick={() => handleVerify(org.id)}
+                              disabled={actionLoading === org.id}
+                              className={verifyButtonClassName}
+                            >
+                              <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
+                              Verify
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -145,29 +209,80 @@ export default function CompaniesPage() {
               </table>
             </div>
 
-            <div className="md:hidden divide-y divide-slate-100">
-              {list.map((org) => (
-                <div key={org.id} className="p-4">
-                  <p className="font-semibold text-text-primary">{org.companyName || '—'}</p>
-                  <p className="text-sm text-text-secondary">{org.user?.name || org.user?.email || '—'}</p>
-                  <div className="flex items-center gap-2 mt-3">
-                    <Badge variant={org.isVerified ? 'success' : 'warning'}>
-                      {org.isVerified ? 'Verified' : 'Pending'}
-                    </Badge>
-                    {!org.isVerified && (
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={() => handleVerify(org.id)}
-                        disabled={actionLoading === org.id}
-                        className="min-h-[44px]"
-                      >
-                        Verify
-                      </Button>
+            <div className="md:hidden divide-y divide-white/10">
+              {list.map((org) => {
+                const expanded = expandedOrgId === org.id;
+                return (
+                  <div key={org.id} className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-text-primary line-clamp-2 pr-1">
+                          {org.companyName || '—'}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge variant={org.isVerified ? 'success' : 'warning'}>
+                            {org.isVerified ? 'Verified' : 'Pending'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <MobileDetailEyeButton
+                        expanded={expanded}
+                        onClick={() =>
+                          setExpandedOrgId((id) => (id === org.id ? null : org.id))
+                        }
+                        aria-label={expanded ? 'Hide contact details' : 'Show contact details'}
+                      />
+                    </div>
+                    <div className="mt-3 flex min-h-[44px] flex-wrap items-center gap-5">
+                      {org.user?.cvSlug && cvPublicUrl(org.user.cvSlug) ? (
+                        <a
+                          href={cvPublicUrl(org.user.cvSlug)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-xl border border-accent/25 bg-accent/10 px-4 text-sm font-semibold text-accent transition-ui hover:bg-accent/15"
+                        >
+                          <FileText className="h-4 w-4 shrink-0" aria-hidden />
+                          View CV
+                        </a>
+                      ) : (
+                        <span className="inline-flex min-h-[44px] shrink-0 items-center rounded-xl border border-white/5 bg-white/2 px-3 text-xs font-medium text-text-muted">
+                          No CV
+                        </span>
+                      )}
+                      {!org.isVerified && (
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={() => handleVerify(org.id)}
+                          disabled={actionLoading === org.id}
+                          className={`min-h-[44px] shrink-0 ${verifyButtonClassName}`}
+                        >
+                          <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
+                          Verify
+                        </Button>
+                      )}
+                    </div>
+                    {expanded && (
+                      <div className="mt-3 rounded-xl border border-white/10 bg-white/3 px-3 py-3 space-y-3">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                            Contact
+                          </p>
+                          <p className="mt-1 text-sm text-text-primary">{org.user?.name || '—'}</p>
+                        </div>
+                        <div className="border-t border-white/10 pt-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                            Email
+                          </p>
+                          <p className="mt-1 break-all text-sm text-text-primary">
+                            {org.user?.email || '—'}
+                          </p>
+                        </div>
+                      </div>
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {!loading && list.length === 0 && (
@@ -193,6 +308,7 @@ export default function CompaniesPage() {
           />
         )}
       </Card>
+
     </div>
   );
 }

@@ -22,6 +22,7 @@ import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
 import toast from 'react-hot-toast';
 import { ChevronDown, ChevronUp, Briefcase, Trash2, ExternalLink, User } from 'lucide-react';
+import { MobileDetailEyeButton } from '../../components/mobile/MobileDetailEyeButton';
 const CLIENT_BASE = import.meta.env.VITE_CLIENT_URL || (typeof window !== 'undefined' ? window.location.origin : '');
 
 const APP_STAT_KEYS = ['pending', 'reviewed', 'shortlisted', 'accepted', 'rejected'];
@@ -50,6 +51,7 @@ export default function JobsPage() {
   const [perPage, setPerPage] = useState(10);
   const [deleteModal, setDeleteModal] = useState(null);
   const [expandedJobId, setExpandedJobId] = useState(null);
+  const [detailJob, setDetailJob] = useState(null);
 
   const load = useCallback(() => {
     dispatch(
@@ -263,75 +265,24 @@ export default function JobsPage() {
             </div>
 
             <div className="md:hidden divide-y divide-white/5">
-              {list.map((job) => {
-                const apps = applications(job);
-                const isExpanded = expandedJobId === job.id;
-                return (
-                  <div
-                    key={job.id}
-                    className="p-4 transition-ui"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setExpandedJobId(isExpanded ? null : job.id)}
-                      className="w-full text-left rounded-xl p-3 -m-1 hover:bg-hover active:bg-white/10 transition-ui tap-feedback"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-semibold text-text-primary">{job.title}</p>
-                          <p className="text-sm text-text-secondary">{job.company}</p>
-                          <p className="text-sm text-text-muted mt-0.5">Posted: {formatDate(job.postedAt)}</p>
-                          <p className="text-sm font-medium text-text-primary mt-1">
-                            {job.applicationCount ?? 0} application{(job.applicationCount ?? 0) !== 1 ? 's' : ''}
-                            {job.applicationStats && (
-                              <span className="text-text-muted font-normal block mt-0.5">
-                                {APP_STAT_KEYS.map((key) => `${APP_STAT_SHORT[key]}: ${job.applicationStats[key] ?? 0}`).join(' · ')}
-                              </span>
-                            )}
-                          </p>
-                        </div>
-                        <span className="shrink-0 text-slate-400">
-                          {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                        </span>
+              {list.map((job) => (
+                <div key={job.id} className="p-4 transition-ui">
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-text-primary">{job.title}</p>
+                        <p className="text-sm text-text-secondary">{job.company}</p>
+                        <p className="text-sm text-text-muted mt-0.5">Posted: {formatDate(job.postedAt)}</p>
+                        <p className="text-sm font-medium text-text-primary mt-1">
+                          {job.applicationCount ?? 0} application{(job.applicationCount ?? 0) !== 1 ? 's' : ''}
+                        </p>
                       </div>
-                    </button>
-                    {isExpanded && (
-                      <div className="mt-3 pl-2 border-l-2 border-primary/30 rounded-r-lg space-y-2">
-                        <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Applicants</p>
-                        {apps.length === 0 ? (
-                          <p className="text-sm text-text-muted">No applications yet.</p>
-                        ) : (
-                          apps.map((app) => (
-                            <div
-                              key={app.id}
-                              className="flex flex-wrap items-center gap-3 py-2.5 px-3 rounded-xl bg-surface-soft border border-white/5"
-                            >
-                              <Avatar name={app.applicant?.name} email={app.applicant?.email} size="sm" />
-                              <div className="min-w-0 flex-1">
-                                <p className="font-medium text-text-primary">{app.applicant?.name || app.applicant?.email || '—'}</p>
-                                {app.applicant?.email && app.applicant?.name && (
-                                  <p className="text-xs text-text-muted truncate">{app.applicant.email}</p>
-                                )}
-                                <p className="text-xs text-text-muted mt-0.5">Applied: {formatDate(app.appliedAt)}</p>
-                              </div>
-                              <ApplicationStatusBadge status={app.status} />
-                              {app.applicant?.cvSlug && (
-                                <a
-                                  href={`${CLIENT_BASE.replace(/\/+$/, '')}/${app.applicant.cvSlug}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 min-h-[32px] px-2.5 rounded-lg border border-white/10 bg-input text-text-primary text-sm font-medium hover:bg-hover hover:border-accent/30 transition-ui shrink-0"
-                                >
-                                  <User className="w-3.5 h-3.5" />
-                                  View profile
-                                </a>
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    )}
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <MobileDetailEyeButton
+                        onClick={() => setDetailJob(job)}
+                        aria-label="View job details and applicants"
+                      />
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-white/10">
                       {job.employer?.cvSlug && (
                         <a
                           href={`${CLIENT_BASE.replace(/\/+$/, '')}/${job.employer.cvSlug}`}
@@ -344,19 +295,85 @@ export default function JobsPage() {
                         </a>
                       )}
                       <Button
-                      size="sm"
-                      variant="danger"
-                      onClick={() => setDeleteModal({ id: job.id, title: job.title })}
-                      disabled={actionLoading === job.id}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete job
+                        size="sm"
+                        variant="danger"
+                        onClick={() => setDeleteModal({ id: job.id, title: job.title })}
+                        disabled={actionLoading === job.id}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete job
                       </Button>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
+
+            <Modal
+              open={!!detailJob}
+              onClose={() => setDetailJob(null)}
+              title="Job details"
+              size="lg"
+              scrollable
+            >
+              {detailJob && (
+                <div className="space-y-4 text-text-primary">
+                  <div>
+                    <p className="font-semibold text-lg">{detailJob.title}</p>
+                    <p className="text-sm text-text-secondary mt-1">{detailJob.company}</p>
+                    <p className="text-sm text-text-muted mt-1">Posted: {formatDate(detailJob.postedAt)}</p>
+                    <p className="text-sm font-medium mt-2">
+                      {detailJob.applicationCount ?? 0} application{(detailJob.applicationCount ?? 0) !== 1 ? 's' : ''}
+                    </p>
+                    {detailJob.applicationStats && (
+                      <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-xs text-text-muted mt-2">
+                        {APP_STAT_KEYS.map((key) => (
+                          <span key={key}>
+                            {APP_STAT_SHORT[key]}: {detailJob.applicationStats[key] ?? 0}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="border-t border-white/10 pt-4 space-y-2">
+                    <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Applicants</p>
+                    {applications(detailJob).length === 0 ? (
+                      <p className="text-sm text-text-muted">No applications yet.</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {applications(detailJob).map((app) => (
+                          <li
+                            key={app.id}
+                            className="flex flex-wrap items-center gap-3 py-2.5 px-3 rounded-xl bg-surface-soft border border-white/5"
+                          >
+                            <Avatar name={app.applicant?.name} email={app.applicant?.email} size="sm" />
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-text-primary truncate">{app.applicant?.name || app.applicant?.email || '—'}</p>
+                              {app.applicant?.email && app.applicant?.name && (
+                                <p className="text-xs text-text-muted truncate">{app.applicant.email}</p>
+                              )}
+                              <p className="text-xs text-text-muted mt-0.5">Applied: {formatDate(app.appliedAt)}</p>
+                            </div>
+                            <ApplicationStatusBadge status={app.status} />
+                            {app.applicant?.cvSlug && (
+                              <a
+                                href={`${CLIENT_BASE.replace(/\/+$/, '')}/${app.applicant.cvSlug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 min-h-[32px] px-2.5 rounded-lg border border-white/10 bg-input text-text-primary text-sm font-medium hover:bg-hover hover:border-accent/30 transition-ui shrink-0"
+                              >
+                                <User className="w-3.5 h-3.5" />
+                                View profile
+                              </a>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              )}
+            </Modal>
 
             {!loading && list.length === 0 && (
               <div className="flex flex-col items-center justify-center py-16 px-4">

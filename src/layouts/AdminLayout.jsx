@@ -22,6 +22,17 @@ const navItems = [
   },
 ];
 
+/** Shown in mobile bottom bar only; full list stays in the sidebar. */
+const BOTTOM_NAV_ORDER = [
+  '/admin/dashboard',
+  '/admin/companies',
+  '/admin/candidate-verifications',
+  '/admin/orders',
+];
+const bottomNavItems = BOTTOM_NAV_ORDER.map((to) =>
+  navItems.find((item) => item.to === to)
+).filter(Boolean);
+
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [bottomNavVisible, setBottomNavVisible] = useState(true);
@@ -83,10 +94,13 @@ export default function AdminLayout() {
           <div className="p-4 sm:p-6 lg:p-8 min-h-full">
             <Outlet />
           </div>
-          <div className="h-16 sm:h-0" aria-hidden />
+          <div
+            className="min-h-[calc(4.9rem+env(safe-area-inset-bottom,0px))] sm:min-h-0 sm:h-0"
+            aria-hidden
+          />
         </main>
       </div>
-      <BottomNav navItems={navItems} onViewSite={handleViewSite} onLogout={handleLogout} visible={bottomNavVisible} />
+      <BottomNav navItems={bottomNavItems} visible={bottomNavVisible} />
     </div>
   );
 }

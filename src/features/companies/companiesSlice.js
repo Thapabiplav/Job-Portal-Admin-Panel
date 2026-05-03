@@ -1,19 +1,22 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { adminAPI } from '../../api/axios';
-import { logout } from '../auth/authSlice';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { adminAPI } from "../../api/axios";
+import { logout } from "../auth/authSlice";
 
 function organizationsListQueryKey(params) {
-  if (!params || typeof params !== 'object') return '{}';
+  if (!params || typeof params !== "object") return "{}";
   const { page = 1, limit = 10, verified } = params;
   return JSON.stringify({
     page: Number(page) || 1,
     limit: Number(limit) || 10,
-    verified: verified !== undefined && verified !== null && verified !== '' ? String(verified) : '',
+    verified:
+      verified !== undefined && verified !== null && verified !== ""
+        ? String(verified)
+        : "",
   });
 }
 
 export const fetchOrganizations = createAsyncThunk(
-  'companies/fetchOrganizations',
+  "companies/fetchOrganizations",
   async (params, { rejectWithValue }) => {
     try {
       const res = await adminAPI.getOrganizations(params);
@@ -22,7 +25,9 @@ export const fetchOrganizations = createAsyncThunk(
         pagination: res.data?.pagination ?? {},
       };
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to load companies.');
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to load companies.",
+      );
     }
   },
   {
@@ -31,24 +36,31 @@ export const fetchOrganizations = createAsyncThunk(
       if (getState().companies.lastListQueryKey === key) return false;
       return true;
     },
-  }
+  },
 );
 
 export const verifyOrganization = createAsyncThunk(
-  'companies/verifyOrganization',
+  "companies/verifyOrganization",
   async (id, { rejectWithValue }) => {
     try {
       await adminAPI.verifyOrganization(id);
       return id;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to verify company.');
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to verify company.",
+      );
     }
-  }
+  },
 );
 
 const initialState = {
   list: [],
-  pagination: { currentPage: 1, totalPages: 0, totalItems: 0, itemsPerPage: 10 },
+  pagination: {
+    currentPage: 1,
+    totalPages: 0,
+    totalItems: 0,
+    itemsPerPage: 10,
+  },
   lastListQueryKey: null,
   isLoading: false,
   error: null,
@@ -57,7 +69,7 @@ const initialState = {
 };
 
 const companiesSlice = createSlice({
-  name: 'companies',
+  name: "companies",
   initialState,
   reducers: {
     clearCompaniesError: (state) => {
@@ -90,7 +102,11 @@ const companiesSlice = createSlice({
       .addCase(verifyOrganization.fulfilled, (state, { payload }) => {
         const idx = state.list.findIndex((c) => c.id === payload);
         if (idx !== -1) {
-          state.list[idx] = { ...state.list[idx], isVerified: true, status: 'verified' };
+          state.list[idx] = {
+            ...state.list[idx],
+            isVerified: true,
+            status: "verified",
+          };
         }
         state.actionLoading = null;
         state.actionError = null;
@@ -108,6 +124,8 @@ export const selectCompaniesList = (state) => state.companies.list;
 export const selectCompaniesPagination = (state) => state.companies.pagination;
 export const selectCompaniesLoading = (state) => state.companies.isLoading;
 export const selectCompaniesError = (state) => state.companies.error;
-export const selectCompaniesActionLoading = (state) => state.companies.actionLoading;
-export const selectCompaniesActionError = (state) => state.companies.actionError;
+export const selectCompaniesActionLoading = (state) =>
+  state.companies.actionLoading;
+export const selectCompaniesActionError = (state) =>
+  state.companies.actionError;
 export default companiesSlice.reducer;
