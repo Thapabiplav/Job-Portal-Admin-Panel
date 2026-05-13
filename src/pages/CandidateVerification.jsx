@@ -20,20 +20,12 @@ import { Pagination } from '../components/ui/Pagination';
 import { StatCard } from '../components/cards/StatCard';
 import { Skeleton } from '../components/ui/Skeleton';
 import { UserCheck, Clock, FileText, ShieldCheck } from 'lucide-react';
+import { storefrontPublicUrl } from '../utils/storefrontUrl';
 
 const statIconSize = 'w-5 h-5';
 
 const verifyButtonClassName =
   'gap-2 px-4 sm:px-5 font-semibold tracking-wide shadow-[0_4px_24px_rgba(167,139,250,0.35)] ring-2 ring-white/20 hover:ring-accent/50 hover:shadow-[0_6px_28px_rgba(167,139,250,0.45)] active:scale-[0.98] transition-transform';
-
-const CLIENT_BASE =
-  import.meta.env.VITE_CLIENT_URL || (typeof window !== 'undefined' ? window.location.origin : '');
-
-const cvPublicUrl = (cvSlug) => {
-  if (!cvSlug) return null;
-  const base = String(CLIENT_BASE).replace(/\/+$/, '');
-  return `${base}/${String(cvSlug).replace(/^\/+/, '')}`;
-};
 
 export default function CandidateVerification() {
   const dispatch = useDispatch();
@@ -221,10 +213,10 @@ export default function CandidateVerification() {
                         </Badge>
                       </td>
                       <td className="py-3 px-4 border-r-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          {row.user?.cvSlug && cvPublicUrl(row.user.cvSlug) ? (
+                        <div className="flex flex-wrap items-center gap-3">
+                          {row.user?.cvSlug && storefrontPublicUrl(row.user.cvSlug) ? (
                             <a
-                              href={cvPublicUrl(row.user.cvSlug)}
+                              href={storefrontPublicUrl(row.user.cvSlug)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-hover px-3 py-2 text-sm font-medium text-text-primary transition-ui hover:bg-white/10"
@@ -280,9 +272,9 @@ export default function CandidateVerification() {
                       />
                     </div>
                     <div className="mt-3 flex min-h-[44px] flex-wrap items-center gap-5">
-                      {row.user?.cvSlug && cvPublicUrl(row.user.cvSlug) ? (
+                      {row.user?.cvSlug && storefrontPublicUrl(row.user.cvSlug) ? (
                         <a
-                          href={cvPublicUrl(row.user.cvSlug)}
+                          href={storefrontPublicUrl(row.user.cvSlug)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-xl border border-accent/25 bg-accent/10 px-4 text-sm font-semibold text-accent transition-ui hover:bg-accent/15"

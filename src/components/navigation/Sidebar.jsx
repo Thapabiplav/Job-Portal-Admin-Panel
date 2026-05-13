@@ -6,6 +6,7 @@ import {
   Building2,
   UserCheck,
   ShoppingBag,
+  ClipboardList,
   ExternalLink,
   LogOut,
   X,
@@ -19,6 +20,7 @@ const iconMap = {
   candidateVerification: UserCheck,
   orders: ShoppingBag,
   services: Briefcase,
+  quota: ClipboardList,
 };
 
 export function Sidebar({ open, onClose, navItems, onViewSite, onLogout }) {
@@ -57,8 +59,18 @@ export function Sidebar({ open, onClose, navItems, onViewSite, onLogout }) {
               <X className="w-5 h-5" />
             </button>
           </div>
-          <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+          <nav className="flex-1 min-h-0 px-3 space-y-1 overflow-y-auto overflow-x-hidden admin-scroll">
             {navItems.map((item) => {
+              if (item.type === "section") {
+                return (
+                  <div
+                    key={`section-${item.label}`}
+                    className="px-4 pt-2 pb-1 text-[10px] sm:text-xs font-semibold tracking-wide uppercase text-text-muted"
+                  >
+                    {item.label}
+                  </div>
+                );
+              }
               const Icon = iconMap[item.icon];
               return (
                 <NavLink

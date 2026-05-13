@@ -20,6 +20,17 @@ const navItems = [
     label: 'Approve Candidate',
     icon: 'candidateVerification',
   },
+  { type: "section", label: "Listing quota requests" },
+  {
+    to: "/admin/quota-requests/products",
+    label: "Product quota requests",
+    icon: "quota",
+  },
+  {
+    to: "/admin/quota-requests/services",
+    label: "Service quota requests",
+    icon: "quota",
+  },
 ];
 
 /** Shown in mobile bottom bar only; full list stays in the sidebar. */
@@ -78,7 +89,7 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="h-screen bg-surface flex flex-col overflow-hidden">
+    <div className="flex min-h-0 h-screen max-h-screen flex-col overflow-hidden bg-surface">
       <header className="shrink-0 sticky top-0 z-30">
         <AppHeader onMenuClick={() => setSidebarOpen((o) => !o)} />
       </header>
@@ -90,8 +101,11 @@ export default function AdminLayout() {
           onViewSite={handleViewSite}
           onLogout={handleLogout}
         />
-        <main ref={mainRef} className="flex-1 min-w-0 overflow-auto focus:outline-none">
-          <div className="p-4 sm:p-6 lg:p-8 min-h-full">
+        <main
+          ref={mainRef}
+          className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden admin-scroll focus:outline-none"
+        >
+          <div className="p-4 sm:p-6 lg:p-8 min-h-0">
             <Outlet />
           </div>
           <div

@@ -21,9 +21,14 @@ import { Avatar } from '../../components/ui/Avatar';
 import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
 import toast from 'react-hot-toast';
-import { ChevronDown, ChevronUp, Briefcase, Trash2, ExternalLink, User } from 'lucide-react';
+import { ChevronDown, ChevronUp, Briefcase, Trash2, FileText } from 'lucide-react';
 import { MobileDetailEyeButton } from '../../components/mobile/MobileDetailEyeButton';
-const CLIENT_BASE = import.meta.env.VITE_CLIENT_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+import { storefrontPublicUrl } from '../../utils/storefrontUrl';
+
+const cvLinkRow =
+  'inline-flex items-center gap-1.5 min-h-[36px] rounded-xl border border-white/10 bg-hover px-3 py-2 text-sm font-medium text-text-primary transition-ui hover:bg-white/10 hover:border-accent/30 shrink-0';
+const cvLinkMobile =
+  'inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-xl border border-accent/25 bg-accent/10 px-4 text-sm font-semibold text-accent transition-ui hover:bg-accent/15';
 
 const APP_STAT_KEYS = ['pending', 'reviewed', 'shortlisted', 'accepted', 'rejected'];
 const APP_STAT_SHORT = { pending: 'Pend', reviewed: 'Rev', shortlisted: 'Short', accepted: 'Acc', rejected: 'Rej' };
@@ -191,25 +196,26 @@ export default function JobsPage() {
                             )}
                           </td>
                           <td className="py-3 px-4 border-r-0">
-                            <div className="flex items-center gap-2">
-                              {job.employer?.cvSlug && (
+                            <div className="flex flex-wrap items-center gap-3">
+                              {job.employer?.cvSlug && storefrontPublicUrl(job.employer.cvSlug) ? (
                                 <a
-                                  href={`${CLIENT_BASE.replace(/\/+$/, '')}/${job.employer.cvSlug}`}
+                                  href={storefrontPublicUrl(job.employer.cvSlug)}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 min-h-[32px] px-2.5 rounded-lg border border-white/10 bg-input text-text-primary text-sm font-medium hover:bg-hover hover:border-accent/30 transition-ui"
+                                  className={cvLinkRow}
                                 >
-                                  <ExternalLink className="w-3.5 h-3.5" />
-                                  View profile
+                                  <FileText className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+                                  View CV
                                 </a>
-                              )}
+                              ) : null}
                               <Button
                                 size="sm"
                                 variant="danger"
                                 onClick={() => setDeleteModal({ id: job.id, title: job.title })}
                                 disabled={actionLoading === job.id}
+                                className="inline-flex min-h-[36px] items-center gap-1.5 px-3 font-semibold"
                               >
-                                <Trash2 className="w-4 h-4 mr-1" />
+                                <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
                                 Delete
                               </Button>
                             </div>
@@ -238,17 +244,17 @@ export default function JobsPage() {
                                           <p className="text-xs text-text-muted mt-0.5">Applied: {formatDate(app.appliedAt)}</p>
                                         </div>
                                         <ApplicationStatusBadge status={app.status} />
-                                        {app.applicant?.cvSlug && (
+                                        {app.applicant?.cvSlug && storefrontPublicUrl(app.applicant.cvSlug) ? (
                                           <a
-                                            href={`${CLIENT_BASE.replace(/\/+$/, '')}/${app.applicant.cvSlug}`}
+                                            href={storefrontPublicUrl(app.applicant.cvSlug)}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 min-h-[32px] px-2.5 rounded-lg border border-white/10 bg-input text-text-primary text-sm font-medium hover:bg-hover hover:border-accent/30 transition-ui shrink-0"
+                                            className={cvLinkRow}
                                           >
-                                            <User className="w-3.5 h-3.5" />
-                                            View profile
+                                            <FileText className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+                                            View CV
                                           </a>
-                                        )}
+                                        ) : null}
                                       </li>
                                     ))}
                                   </ul>
@@ -282,25 +288,26 @@ export default function JobsPage() {
                         aria-label="View job details and applicants"
                       />
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-white/10">
-                      {job.employer?.cvSlug && (
+                    <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-white/10">
+                      {job.employer?.cvSlug && storefrontPublicUrl(job.employer.cvSlug) ? (
                         <a
-                          href={`${CLIENT_BASE.replace(/\/+$/, '')}/${job.employer.cvSlug}`}
+                          href={storefrontPublicUrl(job.employer.cvSlug)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 min-h-[36px] px-3 rounded-xl border border-white/10 bg-input text-text-primary text-sm font-medium hover:bg-hover hover:border-accent/30 transition-ui"
+                          className={cvLinkMobile}
                         >
-                          <ExternalLink className="w-4 h-4" />
-                          View profile
+                          <FileText className="h-4 w-4 shrink-0" aria-hidden />
+                          View CV
                         </a>
-                      )}
+                      ) : null}
                       <Button
                         size="sm"
                         variant="danger"
                         onClick={() => setDeleteModal({ id: job.id, title: job.title })}
                         disabled={actionLoading === job.id}
+                        className="inline-flex min-h-[44px] items-center gap-2 px-4 font-semibold"
                       >
-                        <Trash2 className="w-4 h-4 mr-1" />
+                        <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
                         Delete job
                       </Button>
                     </div>
@@ -355,17 +362,17 @@ export default function JobsPage() {
                               <p className="text-xs text-text-muted mt-0.5">Applied: {formatDate(app.appliedAt)}</p>
                             </div>
                             <ApplicationStatusBadge status={app.status} />
-                            {app.applicant?.cvSlug && (
+                            {app.applicant?.cvSlug && storefrontPublicUrl(app.applicant.cvSlug) ? (
                               <a
-                                href={`${CLIENT_BASE.replace(/\/+$/, '')}/${app.applicant.cvSlug}`}
+                                href={storefrontPublicUrl(app.applicant.cvSlug)}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 min-h-[32px] px-2.5 rounded-lg border border-white/10 bg-input text-text-primary text-sm font-medium hover:bg-hover hover:border-accent/30 transition-ui shrink-0"
+                                className={cvLinkRow}
                               >
-                                <User className="w-3.5 h-3.5" />
-                                View profile
+                                <FileText className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+                                View CV
                               </a>
-                            )}
+                            ) : null}
                           </li>
                         ))}
                       </ul>

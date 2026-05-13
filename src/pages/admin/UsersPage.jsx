@@ -23,8 +23,7 @@ import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { Lock, FileText, Trash2, Users, UserCircle, Building2, Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { MobileDetailEyeButton } from '../../components/mobile/MobileDetailEyeButton';
-
-const CLIENT_BASE = import.meta.env.VITE_CLIENT_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+import { storefrontPublicUrl } from '../../utils/storefrontUrl';
 
 const statIconSize = 'w-5 h-5';
 
@@ -89,12 +88,6 @@ export default function UsersPage() {
       toast.success('User deleted successfully');
       setDeleteModal(null);
     }
-  };
-
-  const cvUrl = (user) => {
-    if (!user?.cvSlug) return null;
-    const base = CLIENT_BASE.replace(/\/+$/, '');
-    return `${base}/${user.cvSlug}`;
   };
 
   const totalPages = pagination.totalPages || 1;
@@ -272,9 +265,9 @@ export default function UsersPage() {
                               Locked
                             </span>
                           )}
-                          {u.cvSlug && (
+                          {u.cvSlug && storefrontPublicUrl(u.cvSlug) && (
                             <a
-                              href={cvUrl(u)}
+                              href={storefrontPublicUrl(u.cvSlug)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium bg-hover text-text-primary hover:bg-white/10 transition-ui"
@@ -366,9 +359,9 @@ export default function UsersPage() {
                                 </Button>
                               </div>
                               <div className="flex justify-center min-w-0">
-                                {u.cvSlug ? (
+                                {u.cvSlug && storefrontPublicUrl(u.cvSlug) ? (
                                   <a
-                                    href={cvUrl(u)}
+                                    href={storefrontPublicUrl(u.cvSlug)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex max-w-full items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold sm:text-sm bg-hover text-text-primary min-h-[44px] hover:bg-white/10 transition-ui"

@@ -6,8 +6,7 @@ import {
 } from '../utils/authStore';
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.DEV ? 'http://localhost:5000' : '');
+  import.meta.env.VITE_API_BASE_URL 
 
 const api = axios.create({
   baseURL: API_BASE_URL ? `${API_BASE_URL.replace(/\/$/, '')}/api` : '/api',
@@ -119,6 +118,12 @@ export const adminAPI = {
     api.patch(`/admin/service-bookings/${id}/status`, { status }),
   contactServiceVendorByEmail: (id, payload = {}) =>
     api.post(`/admin/service-bookings/${id}/contact-vendor-email`, payload),
+  getListingQuotaRequests: (params) =>
+    api.get("/admin/listing-quota/requests", { params }),
+  approveListingQuotaRequest: (id, payload = {}) =>
+    api.patch(`/admin/listing-quota/requests/${id}/approve`, payload),
+  rejectListingQuotaRequest: (id, payload = {}) =>
+    api.patch(`/admin/listing-quota/requests/${id}/reject`, payload),
 };
 
 export default api;
