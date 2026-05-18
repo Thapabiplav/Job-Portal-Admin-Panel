@@ -19,8 +19,8 @@ import { Badge } from '../../components/ui/Badge';
 import { Pagination } from '../../components/ui/Pagination';
 import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { Building2, Clock, FileText, ShieldCheck } from 'lucide-react';
-import { storefrontPublicUrl } from '../../utils/storefrontUrl';
+import { Building2, Clock, ShieldCheck } from 'lucide-react';
+import { ProfileViewActions } from '../../components/admin/ProfileViewActions';
 
 const statIconSize = 'w-5 h-5';
 
@@ -168,19 +168,11 @@ export default function CompaniesPage() {
                       </td>
                       <td className="py-3 px-4 border-r-0">
                         <div className="flex flex-wrap items-center gap-3">
-                          {org.user?.cvSlug && storefrontPublicUrl(org.user.cvSlug) ? (
-                            <a
-                              href={storefrontPublicUrl(org.user.cvSlug)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-hover px-3 py-2 text-sm font-medium text-text-primary transition-ui hover:bg-white/10"
-                            >
-                              <FileText className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-                              View CV
-                            </a>
-                          ) : (
-                            <span className="text-xs text-text-muted">No CV</span>
-                          )}
+                          <ProfileViewActions
+                            slug={org.user?.cvSlug}
+                            isVerified={Boolean(org.isVerified)}
+                            variant="desktop"
+                          />
                           {!org.isVerified && (
                             <Button
                               size="sm"
@@ -226,21 +218,11 @@ export default function CompaniesPage() {
                       />
                     </div>
                     <div className="mt-3 flex min-h-[44px] flex-wrap items-center gap-5">
-                      {org.user?.cvSlug && storefrontPublicUrl(org.user.cvSlug) ? (
-                        <a
-                          href={storefrontPublicUrl(org.user.cvSlug)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-xl border border-accent/25 bg-accent/10 px-4 text-sm font-semibold text-accent transition-ui hover:bg-accent/15"
-                        >
-                          <FileText className="h-4 w-4 shrink-0" aria-hidden />
-                          View CV
-                        </a>
-                      ) : (
-                        <span className="inline-flex min-h-[44px] shrink-0 items-center rounded-xl border border-white/5 bg-white/2 px-3 text-xs font-medium text-text-muted">
-                          No CV
-                        </span>
-                      )}
+                      <ProfileViewActions
+                        slug={org.user?.cvSlug}
+                        isVerified={Boolean(org.isVerified)}
+                        variant="mobile"
+                      />
                       {!org.isVerified && (
                         <Button
                           size="sm"
