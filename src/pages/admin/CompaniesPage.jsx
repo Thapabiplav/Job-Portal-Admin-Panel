@@ -170,7 +170,6 @@ export default function CompaniesPage() {
                         <div className="flex flex-wrap items-center gap-3">
                           <ProfileViewActions
                             slug={org.user?.cvSlug}
-                            isVerified={Boolean(org.isVerified)}
                             variant="desktop"
                           />
                           {!org.isVerified && (
@@ -220,7 +219,6 @@ export default function CompaniesPage() {
                     <div className="mt-3 flex min-h-[44px] flex-wrap items-center gap-5">
                       <ProfileViewActions
                         slug={org.user?.cvSlug}
-                        isVerified={Boolean(org.isVerified)}
                         variant="mobile"
                       />
                       {!org.isVerified && (

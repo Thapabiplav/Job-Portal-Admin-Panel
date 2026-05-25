@@ -23,7 +23,7 @@ import { Skeleton } from '../../components/ui/Skeleton';
 import toast from 'react-hot-toast';
 import { ChevronDown, ChevronUp, Briefcase, Trash2, FileText } from 'lucide-react';
 import { MobileDetailEyeButton } from '../../components/mobile/MobileDetailEyeButton';
-import { storefrontPublicUrl } from '../../utils/storefrontUrl';
+import { profilePublicUrl } from '../../utils/storefrontUrl';
 
 const cvLinkRow =
   'inline-flex items-center gap-1.5 min-h-[36px] rounded-xl border border-white/10 bg-hover px-3 py-2 text-sm font-medium text-text-primary transition-ui hover:bg-white/10 hover:border-accent/30 shrink-0';
@@ -197,9 +197,9 @@ export default function JobsPage() {
                           </td>
                           <td className="py-3 px-4 border-r-0">
                             <div className="flex flex-wrap items-center gap-3">
-                              {job.employer?.cvSlug && storefrontPublicUrl(job.employer.cvSlug) ? (
+                              {job.employer?.cvSlug && profilePublicUrl(job.employer.cvSlug) ? (
                                 <a
-                                  href={storefrontPublicUrl(job.employer.cvSlug)}
+                                  href={profilePublicUrl(job.employer.cvSlug)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className={cvLinkRow}
@@ -244,9 +244,9 @@ export default function JobsPage() {
                                           <p className="text-xs text-text-muted mt-0.5">Applied: {formatDate(app.appliedAt)}</p>
                                         </div>
                                         <ApplicationStatusBadge status={app.status} />
-                                        {app.applicant?.cvSlug && storefrontPublicUrl(app.applicant.cvSlug) ? (
+                                        {app.applicant?.cvSlug && profilePublicUrl(app.applicant.cvSlug) ? (
                                           <a
-                                            href={storefrontPublicUrl(app.applicant.cvSlug)}
+                                            href={profilePublicUrl(app.applicant.cvSlug)}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className={cvLinkRow}
@@ -289,9 +289,9 @@ export default function JobsPage() {
                       />
                     </div>
                     <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-white/10">
-                      {job.employer?.cvSlug && storefrontPublicUrl(job.employer.cvSlug) ? (
+                      {job.employer?.cvSlug && profilePublicUrl(job.employer.cvSlug) ? (
                         <a
-                          href={storefrontPublicUrl(job.employer.cvSlug)}
+                          href={profilePublicUrl(job.employer.cvSlug)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={cvLinkMobile}
@@ -362,9 +362,9 @@ export default function JobsPage() {
                               <p className="text-xs text-text-muted mt-0.5">Applied: {formatDate(app.appliedAt)}</p>
                             </div>
                             <ApplicationStatusBadge status={app.status} />
-                            {app.applicant?.cvSlug && storefrontPublicUrl(app.applicant.cvSlug) ? (
+                            {app.applicant?.cvSlug && profilePublicUrl(app.applicant.cvSlug) ? (
                               <a
-                                href={storefrontPublicUrl(app.applicant.cvSlug)}
+                                href={profilePublicUrl(app.applicant.cvSlug)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={cvLinkRow}

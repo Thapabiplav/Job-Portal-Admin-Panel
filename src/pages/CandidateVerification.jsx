@@ -216,7 +216,6 @@ export default function CandidateVerification() {
                         <div className="flex flex-wrap items-center gap-3">
                           <ProfileViewActions
                             slug={row.user?.cvSlug}
-                            isVerified={row.status === 'verified'}
                             variant="desktop"
                           />
                           {row.status !== 'verified' && (
@@ -266,7 +265,6 @@ export default function CandidateVerification() {
                     <div className="mt-3 flex min-h-[44px] flex-wrap items-center gap-5">
                       <ProfileViewActions
                         slug={row.user?.cvSlug}
-                        isVerified={row.status === 'verified'}
                         variant="mobile"
                       />
                       {row.status !== 'verified' && (

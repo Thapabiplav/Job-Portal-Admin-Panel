@@ -23,7 +23,7 @@ import { StatCard } from '../../components/cards/StatCard';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { Lock, FileText, Trash2, Users, UserCircle, Building2, Search, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { MobileDetailEyeButton } from '../../components/mobile/MobileDetailEyeButton';
-import { storefrontPublicUrl } from '../../utils/storefrontUrl';
+import { profilePublicUrl } from '../../utils/storefrontUrl';
 
 const statIconSize = 'w-5 h-5';
 
@@ -265,9 +265,9 @@ export default function UsersPage() {
                               Locked
                             </span>
                           )}
-                          {u.cvSlug && storefrontPublicUrl(u.cvSlug) && (
+                          {u.cvSlug && profilePublicUrl(u.cvSlug) && (
                             <a
-                              href={storefrontPublicUrl(u.cvSlug)}
+                              href={profilePublicUrl(u.cvSlug)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium bg-hover text-text-primary hover:bg-white/10 transition-ui"
@@ -359,9 +359,9 @@ export default function UsersPage() {
                                 </Button>
                               </div>
                               <div className="flex justify-center min-w-0">
-                                {u.cvSlug && storefrontPublicUrl(u.cvSlug) ? (
+                                {u.cvSlug && profilePublicUrl(u.cvSlug) ? (
                                   <a
-                                    href={storefrontPublicUrl(u.cvSlug)}
+                                    href={profilePublicUrl(u.cvSlug)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex max-w-full items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-xs font-semibold sm:text-sm bg-hover text-text-primary min-h-[44px] hover:bg-white/10 transition-ui"

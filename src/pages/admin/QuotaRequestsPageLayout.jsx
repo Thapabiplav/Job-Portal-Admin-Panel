@@ -18,7 +18,7 @@ import {
   XCircle,
   FileText,
 } from "lucide-react";
-import { storefrontPublicUrl } from "../../utils/storefrontUrl";
+import { profilePublicUrl } from "../../utils/storefrontUrl";
 
 const statIconSize = "w-5 h-5";
 
@@ -361,9 +361,9 @@ export default function QuotaRequestsPageLayout({
                         </td>
                         <td className="py-3 px-4 border-r-0">
                           <div className="flex flex-wrap items-center gap-3">
-                            {requester.cvSlug && storefrontPublicUrl(requester.cvSlug) ? (
+                            {requester.cvSlug && profilePublicUrl(requester.cvSlug) ? (
                               <a
-                                href={storefrontPublicUrl(requester.cvSlug)}
+                                href={profilePublicUrl(requester.cvSlug)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className={quotaCvLinkDesktop}
@@ -437,9 +437,9 @@ export default function QuotaRequestsPageLayout({
                       />
                     </div>
                     <div className="mt-3 flex min-h-[44px] flex-wrap items-center gap-3">
-                      {requester.cvSlug && storefrontPublicUrl(requester.cvSlug) ? (
+                      {requester.cvSlug && profilePublicUrl(requester.cvSlug) ? (
                         <a
-                          href={storefrontPublicUrl(requester.cvSlug)}
+                          href={profilePublicUrl(requester.cvSlug)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={quotaCvLinkMobile}
