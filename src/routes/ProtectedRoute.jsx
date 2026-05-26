@@ -6,12 +6,20 @@ import {
   selectAuthHydrated,
 } from '../features/auth/authSlice';
 
-const JOB_PORTAL_DASHBOARD = '/job-portal/dashboard';
-
 function AuthRouteFallback() {
   return (
     <div className="min-h-[50vh] flex items-center justify-center bg-surface">
       <div className="animate-spin rounded-full h-10 w-10 border-2 border-white/20 border-t-accent" />
+    </div>
+  );
+}
+
+function AccessDenied() {
+  return (
+    <div className="min-h-[50vh] flex flex-col items-center justify-center bg-surface gap-3 p-6 text-center">
+      <h2 className="text-xl font-semibold text-white">Access Denied</h2>
+      <p className="text-sm text-white/60">This area is restricted to super admins only.</p>
+      <a href="/admin/login" className="mt-2 text-sm text-accent underline">Back to login</a>
     </div>
   );
 }
@@ -29,7 +37,7 @@ export function ProtectedRoute({ children, requireSuperAdmin = false }) {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
   if (requireSuperAdmin && !isSuperAdmin) {
-    return <Navigate to={JOB_PORTAL_DASHBOARD} replace />;
+    return <AccessDenied />;
   }
   return children;
 }

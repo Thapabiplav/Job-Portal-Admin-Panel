@@ -140,7 +140,7 @@ export default function CandidateVerification() {
         >
           Verified
         </button>
-        <button
+        {/* <button
           type="button"
           onClick={() => {
             setFilter('unverified');
@@ -149,7 +149,7 @@ export default function CandidateVerification() {
           className={tabClass(filter === 'unverified')}
         >
           Unverified
-        </button>
+        </button> */}
       </div>
 
       {(error || actionError) && (

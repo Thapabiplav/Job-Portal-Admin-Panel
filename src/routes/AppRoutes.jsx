@@ -47,7 +47,7 @@ export function AppRoutes() {
           <Route path="companies" element={<CompaniesPage />} />
           <Route path="candidate-verifications" element={<CandidateVerificationPage />} />
         </Route>
-        <Route path="*" element={<Navigate to="/admin" replace />} />
+        <Route path="*" element={<Navigate to="/admin/login" replace />} />
       </Routes>
     </Suspense>
   );
