@@ -8,6 +8,7 @@ import { Pagination } from '../../components/ui/Pagination';
 import { Modal } from '../../components/modals/Modal';
 import { MobileDetailEyeButton } from '../../components/mobile/MobileDetailEyeButton';
 import { adminAPI } from '../../api/axios';
+import { formatOrderVariantLine } from '../../utils/orderVariant';
 import {
   fetchAdminOrders,
   updateAdminOrderStatus,
@@ -73,7 +74,9 @@ const getOrderActions = (statusValue = '') => {
 const buildWhatsAppText = (order) => {
   const vendorName = order?.seller?.name || order?.product?.vendor || 'Vendor';
   const buyerName = order?.buyerName || order?.buyer?.name || 'Customer';
-  return `Hello ${vendorName}, this is a reminder from Superadmin for order ${order?.id}. Please confirm/update this order.\nProduct: ${order?.product?.name || 'Product'}\nCustomer: ${buyerName}\nQuantity: ${order?.quantity || 1}\nTotal: NPR ${formatAmount(order?.totalAmount)}.`;
+  const variant = formatOrderVariantLine(order?.selectedColor, order?.selectedSize);
+  const variantLine = variant ? `\n${variant}` : '';
+  return `Hello ${vendorName}, this is a reminder from Superadmin for order ${order?.id}. Please confirm/update this order.\nProduct: ${order?.product?.name || 'Product'}${variantLine}\nCustomer: ${buyerName}\nQuantity: ${order?.quantity || 1}\nTotal: NPR ${formatAmount(order?.totalAmount)}.`;
 };
 
 /**
@@ -112,10 +115,13 @@ const buildCustomerWhatsAppText = (order) => {
   const product = order?.product?.name || 'your purchase';
   const orderId = order?.id ?? '—';
   const statusLabel = titleCase(String(order?.status || 'pending'));
+  const variant = formatOrderVariantLine(order?.selectedColor, order?.selectedSize);
+  const variantLine = variant ? `• ${variant}\n` : '';
   return (
     `Hello ${name},\n\n` +
     `This is the JobPortal administration team regarding your order #${orderId}.\n\n` +
     `• Product: ${product}\n` +
+    variantLine +
     `• Quantity: ${order?.quantity || 1}\n` +
     `• Total: NPR ${formatAmount(order?.totalAmount)}\n` +
     `• Current status: ${statusLabel}\n\n` +
@@ -349,6 +355,11 @@ export default function OrdersPage() {
                     <p className="text-xs text-text-secondary mt-1">
                       {order.product?.name || 'Product'}
                     </p>
+                    {formatOrderVariantLine(order.selectedColor, order.selectedSize) ? (
+                      <p className="text-xs text-text-secondary mt-1">
+                        {formatOrderVariantLine(order.selectedColor, order.selectedSize)}
+                      </p>
+                    ) : null}
                     <p className="text-xs text-text-secondary mt-1">
                       Qty {order.quantity || 1} · NPR {formatAmount(order.totalAmount)}
                     </p>
@@ -500,6 +511,11 @@ export default function OrdersPage() {
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold">{detailOrder.product?.name || 'Product'}</p>
+                  {formatOrderVariantLine(detailOrder.selectedColor, detailOrder.selectedSize) ? (
+                    <p className="text-sm text-text-secondary mt-1">
+                      {formatOrderVariantLine(detailOrder.selectedColor, detailOrder.selectedSize)}
+                    </p>
+                  ) : null}
                   <p className="text-sm text-text-secondary mt-1">
                     Qty {detailOrder.quantity || 1} · NPR {formatAmount(detailOrder.totalAmount)}
                   </p>
