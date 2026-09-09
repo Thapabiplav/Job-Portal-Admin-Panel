@@ -11,6 +11,7 @@ const OrdersPage = lazy(() => import('../pages/admin/OrdersPage'));
 const ServicesPage = lazy(() => import("../pages/admin/ServicesPage"));
 const ProductQuotaRequestsPage = lazy(() => import("../pages/admin/ProductQuotaRequestsPage"));
 const ServiceQuotaRequestsPage = lazy(() => import("../pages/admin/ServiceQuotaRequestsPage"));
+const FeaturedMarketplaceProductsPage = lazy(() => import("../pages/admin/FeaturedMarketplaceProductsPage"));
 const CandidateVerificationPage = lazy(() => import('../pages/CandidateVerification'));
 const AdminLayout = lazy(() => import('../layouts/AdminLayout'));
 
@@ -42,6 +43,7 @@ export function AppRoutes() {
           <Route path="jobs" element={<JobsPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="services" element={<ServicesPage />} />
+          <Route path="featured-products" element={<FeaturedMarketplaceProductsPage />} />
           <Route path="quota-requests/products" element={<ProductQuotaRequestsPage />} />
           <Route path="quota-requests/services" element={<ServiceQuotaRequestsPage />} />
           <Route path="companies" element={<CompaniesPage />} />

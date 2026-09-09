@@ -124,6 +124,12 @@ export const adminAPI = {
     api.patch(`/admin/listing-quota/requests/${id}/approve`, payload),
   rejectListingQuotaRequest: (id, payload = {}) =>
     api.patch(`/admin/listing-quota/requests/${id}/reject`, payload),
+  getMarketplaceProducts: (params) =>
+    api.get("/admin/marketplace-products", { params }),
+  getMarketplaceVendors: (params) =>
+    api.get("/admin/marketplace-vendors", { params }),
+  setHomepageFeatured: (id, payload) =>
+    api.patch(`/admin/marketplace-products/${id}/homepage-featured`, payload),
 };
 
 export default api;

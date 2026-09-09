@@ -14,6 +14,11 @@ const navItems = [
   { to: '/admin/jobs', label: 'Jobs', icon: 'jobs' },
   { to: '/admin/orders', label: 'Orders', icon: 'orders' },
   { to: "/admin/services", label: "Services", icon: "services" },
+  {
+    to: '/admin/featured-products',
+    label: 'Featured Products',
+    icon: 'featured',
+  },
   { to: '/admin/companies', label: 'Approve Companies', icon: 'companies' },
   {
     to: '/admin/candidate-verifications',

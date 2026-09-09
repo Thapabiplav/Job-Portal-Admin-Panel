@@ -10,6 +10,7 @@ import {
   ExternalLink,
   LogOut,
   X,
+  Star,
 } from 'lucide-react';
 
 const iconMap = {
@@ -21,6 +22,7 @@ const iconMap = {
   orders: ShoppingBag,
   services: Briefcase,
   quota: ClipboardList,
+  featured: Star,
 };
 
 export function Sidebar({ open, onClose, navItems, onViewSite, onLogout }) {
