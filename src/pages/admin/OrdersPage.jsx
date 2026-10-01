@@ -528,6 +528,29 @@ export default function OrdersPage() {
                 <p>Email:<strong> {detailOrder.buyerEmail || detailOrder.buyer?.email || '—'}</strong> </p>
                 <p>Phone:<strong> {detailOrder.buyerPhone || detailOrder.buyer?.phone || '—'}</strong> </p>
                 <p>Address:<strong> {detailOrder.buyerAddress || detailOrder.buyer?.address || '—'}</strong> </p>
+                {detailOrder.deliveryLatitude != null &&
+                detailOrder.deliveryLongitude != null ? (
+                  <p>
+                    GPS:
+                    <strong>
+                      {" "}
+                      {Number(detailOrder.deliveryLatitude).toFixed(5)},{" "}
+                      {Number(detailOrder.deliveryLongitude).toFixed(5)}
+                    </strong>{" "}
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(
+                        "C cube cottage, 6W45+2VM, Kamalamai, Bagmati Province 45900",
+                      )}&destination=${Number(
+                        detailOrder.deliveryLatitude,
+                      )},${Number(detailOrder.deliveryLongitude)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-2 text-accent underline font-semibold"
+                    >
+                      Navigate
+                    </a>
+                  </p>
+                ) : null}
               </div>
               <div className="space-y-2 text-sm border-t border-white/10 pt-4">
                 <p className="font-semibold text-text-primary">Vendor Details:</p>
