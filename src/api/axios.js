@@ -130,6 +130,7 @@ export const adminAPI = {
     api.get("/admin/marketplace-vendors", { params }),
   setHomepageFeatured: (id, payload) =>
     api.patch(`/admin/marketplace-products/${id}/homepage-featured`, payload),
+  getAppDownloads: (params) => api.get('/admin/app-downloads', { params }),
 };
 
 export default api;

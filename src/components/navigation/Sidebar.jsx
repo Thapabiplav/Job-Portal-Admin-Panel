@@ -11,6 +11,7 @@ import {
   LogOut,
   X,
   Star,
+  Smartphone,
 } from 'lucide-react';
 
 const iconMap = {
@@ -23,6 +24,7 @@ const iconMap = {
   services: Briefcase,
   quota: ClipboardList,
   featured: Star,
+  appDownloads: Smartphone,
 };
 
 export function Sidebar({ open, onClose, navItems, onViewSite, onLogout }) {

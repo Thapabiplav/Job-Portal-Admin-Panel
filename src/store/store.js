@@ -7,6 +7,7 @@ import statsReducer from '../features/stats/statsSlice';
 import candidateVerificationsReducer from '../features/candidateVerifications/candidateVerificationsSlice';
 import adminOrdersReducer from '../features/adminOrders/adminOrdersSlice';
 import serviceBookingsReducer from '../features/serviceBookings/serviceBookingsSlice';
+import appDownloadsReducer from '../features/appDownloads/appDownloadsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -18,5 +19,6 @@ export const store = configureStore({
     candidateVerifications: candidateVerificationsReducer,
     adminOrders: adminOrdersReducer,
     serviceBookings: serviceBookingsReducer,
+    appDownloads: appDownloadsReducer,
   },
 });

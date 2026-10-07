@@ -36,6 +36,9 @@ const navItems = [
     label: "Service quota requests",
     icon: "quota",
   },
+  { type: "section", label: "App downloads" },
+  { to: "/admin/app-downloads/driver", label: "Driver", icon: "appDownloads" },
+  { to: "/admin/app-downloads/passenger", label: "Passenger", icon: "appDownloads" },
 ];
 
 /** Shown in mobile bottom bar only; full list stays in the sidebar. */

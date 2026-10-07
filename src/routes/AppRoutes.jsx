@@ -9,6 +9,7 @@ const JobsPage = lazy(() => import('../pages/admin/JobsPage'));
 const CompaniesPage = lazy(() => import('../pages/admin/CompaniesPage'));
 const OrdersPage = lazy(() => import('../pages/admin/OrdersPage'));
 const ServicesPage = lazy(() => import("../pages/admin/ServicesPage"));
+const AppDownloadsPage = lazy(() => import("../pages/admin/AppDownloadsPage"));
 const ProductQuotaRequestsPage = lazy(() => import("../pages/admin/ProductQuotaRequestsPage"));
 const ServiceQuotaRequestsPage = lazy(() => import("../pages/admin/ServiceQuotaRequestsPage"));
 const FeaturedMarketplaceProductsPage = lazy(() => import("../pages/admin/FeaturedMarketplaceProductsPage"));
@@ -43,6 +44,9 @@ export function AppRoutes() {
           <Route path="jobs" element={<JobsPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="services" element={<ServicesPage />} />
+          <Route path="app-downloads" element={<Navigate to="/admin/app-downloads/driver" replace />} />
+          <Route path="app-downloads/driver" element={<AppDownloadsPage audience="driver" />} />
+          <Route path="app-downloads/passenger" element={<AppDownloadsPage audience="passenger" />} />
           <Route path="featured-products" element={<FeaturedMarketplaceProductsPage />} />
           <Route path="quota-requests/products" element={<ProductQuotaRequestsPage />} />
           <Route path="quota-requests/services" element={<ServiceQuotaRequestsPage />} />
