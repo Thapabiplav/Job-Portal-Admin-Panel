@@ -66,6 +66,7 @@ function LeadList({ audience, title, subtitle }) {
             <thead>
               <tr className="bg-input border-b border-accent">
                 <th className="text-left py-4 px-4 text-sm font-semibold text-accent">Phone</th>
+                <th className="text-left py-4 px-4 text-sm font-semibold text-accent">Email</th>
                 <th className="text-left py-4 px-4 text-sm font-semibold text-accent">Submitted</th>
               </tr>
             </thead>
@@ -84,6 +85,18 @@ function LeadList({ audience, title, subtitle }) {
                       </a>
                     ) : (
                       lead.phone
+                    )}
+                  </td>
+                  <td className="py-3 px-4 text-[#FFFFFF]">
+                    {lead.email ? (
+                      <a
+                        href={`mailto:${lead.email}`}
+                        className="text-accent underline underline-offset-2 hover:text-white"
+                      >
+                        {lead.email}
+                      </a>
+                    ) : (
+                      '—'
                     )}
                   </td>
                   <td className="py-3 px-4 text-[#FFFFFF]">{formatSubmitted(lead.createdAt)}</td>
@@ -116,13 +129,13 @@ function LeadList({ audience, title, subtitle }) {
 const PAGE_COPY = {
   driver: {
     title: "Driver",
-    subtitle: "Phone numbers collected before the driver app download.",
+    subtitle: "Phone numbers, and email when someone adds it, collected before the driver app download.",
     listTitle: "Driver numbers",
     listSubtitle: "People who requested the driver app",
   },
   passenger: {
     title: "Passenger",
-    subtitle: "Phone numbers collected before the passenger app download.",
+    subtitle: "Phone numbers, and email when someone adds it, collected before the passenger app download.",
     listTitle: "Passenger numbers",
     listSubtitle: "People who requested the passenger app",
   },
